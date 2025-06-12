@@ -7,7 +7,7 @@ BOARD_COLOR = (222, 184, 135)
 POINT_WIDTH = 60
 POINT_HEIGHT = 250
 CHECKER_RADIUS = 20
-BAR_WIDTH = 20
+BAR_WIDTH = CHECKER_RADIUS * 2  # exactly one checker wide
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 NUM_TRIANGLES_PER_SIDE = 6
@@ -48,7 +48,7 @@ def draw_board(screen):
             (x + POINT_WIDTH // 2, y + direction * POINT_HEIGHT)
         ])
 
-    # Draw center bar
+    # Draw bar same width as checker
     pygame.draw.rect(screen, (105, 105, 105), (
         BAR_START_X,
         0,
