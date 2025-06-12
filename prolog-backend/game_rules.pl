@@ -2,7 +2,7 @@
 % Based on Tesauro's encoding scheme from gym-backgammon
 % Reference: https://github.com/dellalibera/gym-backgammon
 
-:- dynamic point/3, bar/2, off/2.
+:- dynamic point/3, bar/2, off/2, current_dice/1.
 
 bos(da).    %#q what is this?
 
@@ -66,6 +66,13 @@ bear_off(Player, Point) :-
 winner(Player) :- off(Player, 15).
 
 % DICE ROLL
-dice_roll([D1, D2]) :-
+dice_roll(Dice) :-
     random_between(1, 6, D1),
-    random_between(1, 6, D2).
+    random_between(1, 6, D2),
+    (D1 =:= D2 ->
+        Dice = [D1, D1, D1, D1]  % Handle doubles
+    ;
+        Dice = [D1, D2]
+    ),
+    retractall(current_dice(_)),
+    assertz(current_dice(Dice)).
