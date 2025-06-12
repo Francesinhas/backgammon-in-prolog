@@ -7,6 +7,7 @@ BOARD_COLOR = (222, 184, 135)
 POINT_WIDTH = 60
 POINT_HEIGHT = 250
 CHECKER_RADIUS = 20
+OFF_CHECKER_RADIUS = 9  # smaller radius for off checkers to prevent overlap
 BAR_WIDTH = CHECKER_RADIUS * 2  # exactly one checker wide
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -75,7 +76,32 @@ def draw_checkers(screen, white_checkers, black_checkers):
             for j in range(black_checkers[i]):
                 pygame.draw.circle(screen, BLACK, (x, by + j * 2 * CHECKER_RADIUS), CHECKER_RADIUS)
 
-def main(white_checkers, black_checkers):
+def draw_bar_and_off(screen, bar_white, bar_black, off_white, off_black):
+    # Bar checkers (middle)
+    x = BAR_START_X + BAR_WIDTH // 2
+
+    for j in range(bar_white):
+        y = CHECKER_RADIUS + j * 2 * CHECKER_RADIUS
+        pygame.draw.circle(screen, WHITE, (x, y), CHECKER_RADIUS)
+
+    for j in range(bar_black):
+        y = WINDOW_HEIGHT - CHECKER_RADIUS - j * 2 * CHECKER_RADIUS
+        pygame.draw.circle(screen, BLACK, (x, y), CHECKER_RADIUS)
+
+    # Off checkers (bottom-right corner)
+    x_off = RIGHT_ZONE_START + NUM_TRIANGLES_PER_SIDE * POINT_WIDTH + 2 * CHECKER_RADIUS
+    y_start_white = WINDOW_HEIGHT - (off_white + off_black) * 2 * OFF_CHECKER_RADIUS
+
+    for j in range(off_white):
+        y = y_start_white + j * 2 * OFF_CHECKER_RADIUS
+        pygame.draw.circle(screen, WHITE, (x_off, y), OFF_CHECKER_RADIUS)
+
+    for j in range(off_black):
+        y = y_start_white + (off_white + j) * 2 * OFF_CHECKER_RADIUS
+        pygame.draw.circle(screen, BLACK, (x_off, y), OFF_CHECKER_RADIUS)
+
+
+def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_black):
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Backgammon")
@@ -89,6 +115,7 @@ def main(white_checkers, black_checkers):
 
         draw_board(screen)
         draw_checkers(screen, white_checkers, black_checkers)
+        draw_bar_and_off(screen, bar_white, bar_black, off_white, off_black)
 
         pygame.display.flip()
         clock.tick(30)
@@ -96,9 +123,10 @@ def main(white_checkers, black_checkers):
     pygame.quit()
 
 if __name__ == "__main__":
-    white = [0]*24
-    black = [0]*24
+    white = [0] * 24
+    black = [0] * 24
 
+    # Normal checkers
     white[0] = 2     # Point 1
     white[11] = 5    # Point 12
     white[16] = 3    # Point 17
@@ -106,4 +134,10 @@ if __name__ == "__main__":
     black[12] = 5    # Point 13
     black[7] = 3     # Point 8
 
-    main(white, black)
+    # Test bar and off
+    bar_white = 2
+    bar_black = 3
+    off_white = 15
+    off_black = 15
+
+    main(white, black, bar_white, bar_black, off_white, off_black)
