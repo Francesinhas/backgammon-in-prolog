@@ -15,6 +15,19 @@ can_bear_off(white).
 asserta(point(7, white, 1)).
 can_bear_off(white).
 
+test_valid_moves :-
+    initial_state,
+    % Should succeed (white can move from 19 to 16)
+    valid_move(white, 24, 21),
+    % Should fail (wrong direction)
+    \+ valid_move(white, 13, 14),
+    % Should fail (black's piece)
+    \+ valid_move(white, 13, 12),
+    % Should be true, to place on black's one piece
+    (asserta(point(11, black, 1)),
+    valid_move(white, 13, 11)),
+    write('All tests passed').
+
 test :-
     initial_state,
     valid_move(white, 17, 12),  % Should succeed
