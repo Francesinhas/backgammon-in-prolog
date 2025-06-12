@@ -30,4 +30,4 @@ TODO
 
 1. We'll define the board using the Tesauro encoding. We'll represent the board as 24 points, each with a color and a number of checkers. Also, we have the bar and off for each player.
 
-![image](/backgammon_board.png)
+![image](/resources/backgammon_board.png)
