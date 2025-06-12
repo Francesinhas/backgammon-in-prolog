@@ -1,16 +1,21 @@
 % Main file that aggregates commands for updating the state
 
+% Other useful predicates:
+%   initial_state/0
+%   current_dice/1 
+%   state_to_list/1 - [Points, Bar, Off]
+%   dice_roll/1
+
+% necessary supressions for swi runtime
+:- discontiguous perform_move/3.
+:- discontiguous perform_move_from_bar/2.
+:- discontiguous perform_bear_off/2.
+:- discontiguous move_length/4.
+:- discontiguous entry_point_length/3.
+:- discontiguous bear_off_length/3.
+
 :- include('game_rules').
 :- include('state_manager').
-
-move_length(Player, From, To, L) :-
-    (Player = white -> L is From - To ; L is To - From).
-
-entry_point_length(white, To, L) :- L is To.
-entry_point_length(black, To, L) :- L is 25 - To.
-
-bear_off_length(white, Point, L) :- L is Point.
-bear_off_length(black, Point, L) :- L is 25 - Point.
 
 perform_move(Player, From, To) :-
     valid_move_with_dice(Player, From, To),
@@ -30,3 +35,15 @@ perform_bear_off(Player, Point) :-
     bear_off_piece(Player, Point),
     bear_off_length(Player, Point, L),
     use_die(L).
+
+
+% helper predicates:
+
+move_length(Player, From, To, L) :-
+    (Player = white -> L is From - To ; L is To - From).
+
+entry_point_length(white, To, L) :- L is To.
+entry_point_length(black, To, L) :- L is 25 - To.
+
+bear_off_length(white, Point, L) :- L is Point.
+bear_off_length(black, Point, L) :- L is 25 - Point.

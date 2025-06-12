@@ -2,6 +2,17 @@
 % Based on Tesauro's encoding scheme from gym-backgammon
 % Reference: https://github.com/dellalibera/gym-backgammon
 
+:- module(game_rules, [
+    initial_state/0,
+    valid_move/3,
+    valid_move_with_dice/3,
+    can_bear_off/1,
+    bear_off/2,
+    winner/1,
+    dice_roll/1,
+    current_dice/1
+]).
+
 :- dynamic point/3, bar/2, off/2, current_dice/1.
 
 % INITIAL BOARD SETUP
