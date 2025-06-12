@@ -70,4 +70,5 @@ TODO
     → check_winner
     → ai_turn()
         → choose_move → apply → update board
+    → check_winner
 → show_winner()

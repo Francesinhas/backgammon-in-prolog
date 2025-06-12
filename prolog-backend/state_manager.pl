@@ -2,7 +2,14 @@
 
 :- include('game_rules').
 
-% Handle hit if opponent exists
+% CONSUME USED DIE
+use_die(Length) :-
+    current_dice(Dice),
+    select(Length, Dice, NewDice),
+    retract(current_dice(Dice)),
+    assertz(current_dice(NewDice)).
+
+% HANDLE HIT IF OPPONENT EXISTS
 land_on(Player, To) :-
     (   point(To, Opponent, 1), Opponent \= Player
     ->  retract(point(To, Opponent, 1)),

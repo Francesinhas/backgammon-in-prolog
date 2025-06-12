@@ -2,7 +2,27 @@
 % Based on Tesauro's encoding scheme from gym-backgammon
 % Reference: https://github.com/dellalibera/gym-backgammon
 
-:- dynamic point/3, bar/2, off/2.
+% ATTEMPT TO USE MODULES to prevent discontigous errors
+% :- module(game_rules, [
+%     initial_state/0,
+%     valid_move/3,
+%     valid_move_with_dice/3,
+%     can_bear_off/1,
+%     bear_off/2,
+%     winner/1,
+%     dice_roll/1,
+%     current_dice/1
+% ]).
+
+:- discontiguous initial_state/0.
+:- discontiguous valid_move/3.
+:- discontiguous valid_move_with_dice/3.
+:- discontiguous can_bear_off/1.
+:- discontiguous bear_off/2.
+:- discontiguous winner/1.
+:- discontiguous dice_roll/1.
+
+:- dynamic point/3, bar/2, off/2, current_dice/1.
 
 % INITIAL BOARD SETUP
 initial_state :-
@@ -47,6 +67,13 @@ valid_move(Player, From, To) :-
     ;   \+ point(To, _, _)           % Can land on empty point
     ).
 
+% MOVE VALIDATION WITH DICE CHECK
+valid_move_with_dice(Player, From, To) :-
+    current_dice(DiceList),
+    valid_move(Player, From, To),
+    (Player = white -> Length is From - To ; Length is To - From),
+    member(Length, DiceList).
+
 % BEARING OFF
 can_bear_off(Player) :-
     % Must have no pieces on bar
@@ -68,6 +95,13 @@ winner(Player) :-
     off(Player, 15).
 
 % DICE ROLL
-dice_roll([D1, D2]) :-
+dice_roll(Dice) :-
     random_between(1, 6, D1),
-    random_between(1, 6, D2).
+    random_between(1, 6, D2),
+    (D1 =:= D2 ->
+        Dice = [D1, D1, D1, D1]  % Handle doubles
+    ;
+        Dice = [D1, D2]
+    ),
+    retractall(current_dice(_)),
+    assertz(current_dice(Dice)).
