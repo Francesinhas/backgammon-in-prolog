@@ -4,8 +4,6 @@
 
 :- dynamic point/3, bar/2, off/2, current_dice/1.
 
-bos(da).    %#q what is this?
-
 % INITIAL BOARD SETUP
 initial_state :-
     % Clear previous state
@@ -33,37 +31,41 @@ initial_state :-
 
 % MOVE VALIDATION
 valid_move(Player, From, To) :-
-    % Cannot move opponent's pieces
-    point(From, Player, Count), Count > 0,
+
+    point(From, Player, Count), Count > 0,  % Own piece exists
+
+    (Player = white -> To < From ; To > From),  % Direction check
+
+    between(1, 24, To),  % Valid board position
+
+    bar(Player, 0),  % No pieces on bar
     
-    % Calculate target position based on player direction
-    (Player = white -> Target is From - To ; Target is To - From), %#q is the target computation useful or even
-    between(1, 24, Target),
-    
-    % Check target point availability
-    (   point(Target, Player, _) -> true  % Can stack on own pieces
-    ;   point(Target, Opponent, OppCount), 
-        Opponent \= Player, 
-        OppCount =< 1 -> true  % Can hit if 1 or fewer opponents    %#q is the return true really necessary?
-    ;   \+ point(Target, _, _)  % Empty point
-    ),
-    
-    % Special case: Cannot move if pieces on bar
-    bar(Player, BarCount), BarCount =:= 0.  %#q may move to the top and replace with bar(Player, 0).
+    (   point(To, Player, _)        % Can land on own pieces
+    ;   point(To, Opponent, OppCount), % Can hit single opponent
+        OppCount =< 1,     
+        Opponent \= Player
+    ;   \+ point(To, _, _)           % Can land on empty point
+    ).
 
 % BEARING OFF
 can_bear_off(Player) :-
+    % Must have no pieces on bar
+    bar(Player,0),
     % All pieces in home board (1-6 for white, 19-24 for black)
-    forall(point(Point, Player, _), 
-           (Player = white -> Point =< 6 ; Point >= 19)).
+    \+ (point(Point, Player, Count), 
+        Count > 0,
+        (Player = white -> (Point < 1 ; Point > 6) ; (Point < 19 ; Point > 24))
+    ).
 
 bear_off(Player, Point) :-
     can_bear_off(Player),
-    point(Point, Player, Count), Count > 0,
-    (Player = white -> Point =< 6 ; Point >= 19).
+    point(Point, Player, Count),
+    Count > 0,
+    (Player = white -> between(1, 6, Point) ; between(19, 24, Point)).
 
 % WIN CONDITION
-winner(Player) :- off(Player, 15).
+winner(Player) :-
+    off(Player, 15).
 
 % DICE ROLL
 dice_roll(Dice) :-
