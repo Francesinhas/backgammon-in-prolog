@@ -35,18 +35,18 @@ evaluate_move(Player, Dice, move(From, To), Score) :-
     ).
 
 % MINIMAX SKELETON (for future implementation)
-minimax(State, Depth, Move, Eval) :-
-    Depth > 0,
-    findall(Child, transition(State, Child), Children),
-    best_move(Children, Depth, none, -10000, Move, Eval).
+% minimax(State, Depth, Move, Eval) :-
+%     Depth > 0,
+%     findall(Child, transition(State, Child), Children),
+%     best_move(Children, Depth, none, -10000, Move, Eval).
 
-best_move([], _, BestMove, BestEval, BestMove, BestEval).
-best_move([Move|Moves], Depth, CurrBest, CurrEval, BestMove, BestEval) :-
-    apply_move(Move),
-    minimax(NewState, Depth-1, _, Eval),
-    undo_move(Move),
-    (Eval > CurrEval 
-     -> NewBest = Move, NewEval = Eval
-     ;  NewBest = CurrBest, NewEval = CurrEval
-    ),
-    best_move(Moves, Depth, NewBest, NewEval, BestMove, BestEval).
+% best_move([], _, BestMove, BestEval, BestMove, BestEval).
+% best_move([Move|Moves], Depth, CurrBest, CurrEval, BestMove, BestEval) :-
+%     apply_move(Move),
+%     minimax(NewState, Depth-1, _, Eval),
+%     undo_move(Move),
+%     (Eval > CurrEval 
+%      -> NewBest = Move, NewEval = Eval
+%      ;  NewBest = CurrBest, NewEval = CurrEval
+%     ),
+%     best_move(Moves, Depth, NewBest, NewEval, BestMove, BestEval).

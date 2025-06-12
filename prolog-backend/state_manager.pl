@@ -1,5 +1,14 @@
 % State transitions and game operations
 
+:- discontiguous use_die/1.
+:- discontiguous land_on/2.
+:- discontiguous apply_move/3.
+:- discontiguous move_from_bar/2.
+:- discontiguous bear_off_piece/2.
+:- discontiguous update_bar/2.
+:- discontiguous update_off/2.
+:- discontiguous state_to_list/1.
+
 :- include('game_rules').
 
 % CONSUME USED DIE
