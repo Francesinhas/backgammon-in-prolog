@@ -47,6 +47,13 @@ valid_move(Player, From, To) :-
     ;   \+ point(To, _, _)           % Can land on empty point
     ).
 
+% MOVE VALIDATION WITH DICE CHECK
+valid_move_with_dice(Player, From, To) :-
+    current_dice(DiceList),
+    valid_move(Player, From, To),
+    (Player = white -> Length is From - To ; Length is To - From),
+    member(Length, DiceList).
+
 % BEARING OFF
 can_bear_off(Player) :-
     % Must have no pieces on bar
