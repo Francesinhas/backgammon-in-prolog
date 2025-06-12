@@ -10,10 +10,13 @@ choose_move(Player, Dice, Move) :-
     findall(From-To, valid_move(Player, From, To), Moves),
     (Moves = [] 
      -> Move = none  % No moves available
-     ;  evaluate_moves(Player, Moves, Dice, Scores),
+     ;  maplist(wrap_and_evaluate(Player, Dice), Moves, Scores),
         max_member(Score-BestMove, Scores),
         Move = BestMove
     ).
+
+wrap_and_evaluate(Player, Dice, From-To, Score-move(From, To)) :-
+    evaluate_move(Player, Dice, move(From, To), Score).
 
 % EVALUATE MOVES (simple heuristic)
 evaluate_moves(Player, Moves, Dice, Scores) :-
@@ -25,7 +28,7 @@ evaluate_move(Player, Dice, move(From, To), Score) :-
     % 2. Making points (creating anchors)
     % 3. Moving back checkers
     (   point(To, Opponent, 1), Opponent \= Player -> Score = 3  % Hit opponent
-    ;   point(To, empty) -> Score = 2  % Make new point
+    ;   \+ point(To, _, _) -> Score = 2  % Make new point
     ;   Player = white, From > To -> Score = 1  % Move forward
     ;   Player = black, From < To -> Score = 1   % Move forward
     ;   Score = 0  % Default

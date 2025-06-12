@@ -60,4 +60,14 @@ TODO
 - nice to have:
 	- [ ] state_manager:
 		- [ ] don t assert back a number of poins after a move if it drops under 0
-	- [ ] 
+
+### GUI communication with prolog
+→ init_game()
+→ show_board()
+→ while not winner:
+    → player_turn()
+        → roll_dice → get_input → validate/apply → update board
+    → check_winner
+    → ai_turn()
+        → choose_move → apply → update board
+→ show_winner()
