@@ -49,17 +49,23 @@ valid_move(Player, From, To) :-
 
 % BEARING OFF
 can_bear_off(Player) :-
+    % Must have no pieces on bar
+    bar(Player,0),
     % All pieces in home board (1-6 for white, 19-24 for black)
-    forall(point(Point, Player, _), 
-           (Player = white -> Point =< 6 ; Point >= 19)).
+    \+ (point(Point, Player, Count), 
+        Count > 0,
+        (Player = white -> (Point < 1 ; Point > 6) ; (Point < 19 ; Point > 24))
+    ).
 
 bear_off(Player, Point) :-
     can_bear_off(Player),
-    point(Point, Player, Count), Count > 0,
-    (Player = white -> Point =< 6 ; Point >= 19).
+    point(Point, Player, Count),
+    Count > 0,
+    (Player = white -> between(1, 6, Point) ; between(19, 24, Point)).
 
 % WIN CONDITION
-winner(Player) :- off(Player, 15).
+winner(Player) :-
+    off(Player, 15).
 
 % DICE ROLL
 dice_roll([D1, D2]) :-
