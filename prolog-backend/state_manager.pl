@@ -1,27 +1,28 @@
 % State transitions and game operations
-% Inspired by: https://github.com/rlg2161/Backgammon
 
 :- include('game_rules').
+
+% Handle hit if opponent exists
+land_on(Player, To) :-
+    (   point(To, Opponent, 1), Opponent \= Player
+    ->  retract(point(To, Opponent, 1)),
+        update_bar(Opponent, 1),
+        asserta(point(To, Player, 1))
+    ;   point(To, Player, CountTo)
+    ->  retract(point(To, Player, CountTo)),
+        NewCountTo is CountTo + 1,
+        asserta(point(To, Player, NewCountTo))
+    ;   \+ point(To, _, _)
+    ->  asserta(point(To, Player, 1))
+    ).
 
 % APPLY MOVE
 apply_move(Player, From, To) :-
     % Remove piece from source
     retract(point(From, Player, CountFrom)),
     NewCountFrom is CountFrom - 1,
-    asserta(point(From, Player, NewCountFrom)),
-    
-    % Handle hit opponent if exists
-    (   point(To, Opponent, OppCount), Opponent \= Player, OppCount > 0
-    ->  retract(point(To, Opponent, OppCount)),
-        update_bar(Opponent, 1),
-        asserta(point(To, Player, 1))
-    ;   (   point(To, Player, CountTo)
-        ->  retract(point(To, Player, CountTo)),
-            NewCountTo is CountTo + 1,
-            asserta(point(To, Player, NewCountTo))
-        ;   asserta(point(To, Player, 1))
-        )
-    ).
+    (NewCountFrom > 0 -> asserta(point(From, Player, NewCountFrom)) ; true),
+    land_on(Player, To).
 
 % MOVE FROM BAR
 move_from_bar(Player, To) :-
@@ -29,7 +30,7 @@ move_from_bar(Player, To) :-
     retract(bar(Player, BarCount)),
     NewBarCount is BarCount - 1,
     asserta(bar(Player, NewBarCount)),
-    apply_move(Player, bar, To).    %#q this may cause issues
+    land_on(Player, To).
 
 % BEAR OFF PIECE
 bear_off_piece(Player, Point) :-
