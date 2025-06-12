@@ -18,6 +18,12 @@ DICE_SIZE = 50
 DICE_GAP = 10
 DICE_FONT_SIZE = 28
 
+# Special point indices
+BAR_WHITE_IDX = 24
+BAR_BLACK_IDX = 25
+OFF_WHITE_IDX = 26
+OFF_BLACK_IDX = 27
+
 # Derived layout
 TOTAL_PLAY_WIDTH = 2 * NUM_TRIANGLES_PER_SIDE * POINT_WIDTH + BAR_WIDTH
 MARGIN_X = (WINDOW_WIDTH - TOTAL_PLAY_WIDTH) // 2
@@ -25,12 +31,12 @@ LEFT_ZONE_START = MARGIN_X
 BAR_START_X = LEFT_ZONE_START + NUM_TRIANGLES_PER_SIDE * POINT_WIDTH
 RIGHT_ZONE_START = BAR_START_X + BAR_WIDTH
 
-# Move selection state
+# Move state
 selected_from = None
 selected_to = None
 show_popup = False
-popup_rect = pygame.Rect(WINDOW_WIDTH//2 - 120, WINDOW_HEIGHT//2 - 50, 240, 100)
-confirm_button_rect = pygame.Rect(popup_rect.x + 60, popup_rect.y + 50, 120, 30)
+popup_rect = pygame.Rect(WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50, 400, 100)
+confirm_button_rect = pygame.Rect(popup_rect.centerx - 60, popup_rect.y + 50, 120, 30)
 
 def get_point_x(index):
     if index < 6:
@@ -45,6 +51,17 @@ def get_point_x(index):
 def get_triangle_rect(index):
     x = get_point_x(index)
     y = 0 if index >= 12 else WINDOW_HEIGHT - POINT_HEIGHT
+    return pygame.Rect(x, y, POINT_WIDTH, POINT_HEIGHT)
+
+def get_bar_rect(is_white):
+    x = BAR_START_X + BAR_WIDTH // 2 - POINT_WIDTH // 2
+    y = 0 if is_white else WINDOW_HEIGHT - POINT_HEIGHT
+    return pygame.Rect(x, y, POINT_WIDTH, POINT_HEIGHT)
+
+def get_off_rect(is_white):
+    x = RIGHT_ZONE_START + NUM_TRIANGLES_PER_SIDE * POINT_WIDTH + 2 * CHECKER_RADIUS
+    x -= POINT_WIDTH // 2
+    y = 0 if is_white else WINDOW_HEIGHT - POINT_HEIGHT
     return pygame.Rect(x, y, POINT_WIDTH, POINT_HEIGHT)
 
 def draw_board(screen):
@@ -92,7 +109,6 @@ def draw_bar_and_off(screen, bar_white, bar_black, off_white, off_black):
     for j in range(off_white):
         y = OFF_CHECKER_RADIUS + j * 2 * OFF_CHECKER_RADIUS
         pygame.draw.circle(screen, WHITE, (x_white, y), OFF_CHECKER_RADIUS)
-
     for j in range(off_black):
         y = WINDOW_HEIGHT - OFF_CHECKER_RADIUS - j * 2 * OFF_CHECKER_RADIUS
         pygame.draw.circle(screen, BLACK, (x_white, y), OFF_CHECKER_RADIUS)
@@ -110,21 +126,46 @@ def draw_dice(screen, dice_values):
         text_rect = text.get_rect(center=(x + DICE_SIZE // 2, y + DICE_SIZE // 2))
         screen.blit(text, text_rect)
 
-def draw_triangle_buttons(screen, selected_from):
-    for i in range(24):
-        rect = get_triangle_rect(i)
-        color = (255, 255, 0, 80) if selected_from == i else (0, 0, 0, 0)
+def draw_triangle_buttons(screen, selected_from, selected_to):
+    def draw_rect(rect, color):
         s = pygame.Surface((POINT_WIDTH, POINT_HEIGHT), pygame.SRCALPHA)
         s.fill(color)
         screen.blit(s, (rect.x, rect.y))
+
+    for i in range(24):
+        rect = get_triangle_rect(i)
+        color = (255, 255, 0, 80) if selected_from == i else (0, 0, 255, 80) if selected_to == i else (0, 0, 0, 0)
+        draw_rect(rect, color)
+
+    for idx, is_white in [(BAR_WHITE_IDX, True), (BAR_BLACK_IDX, False)]:
+        rect = get_bar_rect(is_white)
+        color = (255, 255, 0, 80) if selected_from == idx else (0, 0, 255, 80) if selected_to == idx else (0, 0, 0, 0)
+        draw_rect(rect, color)
+
+    for idx, is_white in [(OFF_WHITE_IDX, True), (OFF_BLACK_IDX, False)]:
+        rect = get_off_rect(is_white)
+        color = (255, 255, 0, 80) if selected_from == idx else (0, 0, 255, 80) if selected_to == idx else (0, 0, 0, 0)
+        draw_rect(rect, color)
+
+def move_label(idx):
+    if idx == BAR_WHITE_IDX:
+        return "bar (white)"
+    if idx == BAR_BLACK_IDX:
+        return "bar (black)"
+    if idx == OFF_WHITE_IDX:
+        return "off (white)"
+    if idx == OFF_BLACK_IDX:
+        return "off (black)"
+    return str(idx + 1)
 
 def draw_popup(screen, from_idx, to_idx):
     pygame.draw.rect(screen, (240, 240, 240), popup_rect)
     pygame.draw.rect(screen, (0, 0, 0), popup_rect, 2)
     font = pygame.font.SysFont(None, 24)
-    text = font.render(f"Confirm move from {from_idx + 1} to {to_idx + 1}?", True, (0, 0, 0))
-    text_rect = text.get_rect(center=(popup_rect.centerx, popup_rect.y + 25))
-    screen.blit(text, text_rect)
+    text = f"Confirm move from {move_label(from_idx)} to {move_label(to_idx)}?"
+    rendered = font.render(text, True, (0, 0, 0))
+    text_rect = rendered.get_rect(center=(popup_rect.centerx, popup_rect.y + 30))
+    screen.blit(rendered, text_rect)
     pygame.draw.rect(screen, (200, 200, 200), confirm_button_rect)
     pygame.draw.rect(screen, (0, 0, 0), confirm_button_rect, 2)
     confirm_text = font.render("Confirm", True, (0, 0, 0))
@@ -143,20 +184,19 @@ def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_bl
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 sys.exit()
-
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = pygame.mouse.get_pos()
                 if show_popup:
                     if confirm_button_rect.collidepoint(pos):
-                        print(f"Confirmed move from {selected_from + 1} to {selected_to + 1}")
+                        print(f"Confirmed move from {move_label(selected_from)} to {move_label(selected_to)}")
                         selected_from = None
                         selected_to = None
                         show_popup = False
                 else:
+                    found = False
                     for i in range(24):
                         if get_triangle_rect(i).collidepoint(pos):
                             if selected_from is None:
@@ -164,13 +204,32 @@ def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_bl
                             elif selected_to is None:
                                 selected_to = i
                                 show_popup = True
+                            found = True
                             break
+                    if not found:
+                        if get_bar_rect(True).collidepoint(pos):
+                            if selected_from is None:
+                                selected_from = BAR_WHITE_IDX
+                                found = True
+                        elif get_bar_rect(False).collidepoint(pos):
+                            if selected_from is None:
+                                selected_from = BAR_BLACK_IDX
+                                found = True
+                    if not found and selected_from is not None:
+                        if get_off_rect(True).collidepoint(pos):
+                            if selected_to is None:
+                                selected_to = OFF_WHITE_IDX
+                                show_popup = True
+                        elif get_off_rect(False).collidepoint(pos):
+                            if selected_to is None:
+                                selected_to = OFF_BLACK_IDX
+                                show_popup = True
 
         draw_board(screen)
         draw_checkers(screen, white_checkers, black_checkers)
         draw_bar_and_off(screen, bar_white, bar_black, off_white, off_black)
         draw_dice(screen, dice_values)
-        draw_triangle_buttons(screen, selected_from)
+        draw_triangle_buttons(screen, selected_from, selected_to)
         if show_popup and selected_from is not None and selected_to is not None:
             draw_popup(screen, selected_from, selected_to)
 
