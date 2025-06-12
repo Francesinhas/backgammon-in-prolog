@@ -4,7 +4,7 @@
 
 :- dynamic point/3, bar/2, off/2.
 
-bos(da).
+bos(da).    %#q what is this?
 
 % INITIAL BOARD SETUP
 initial_state :-
@@ -37,19 +37,19 @@ valid_move(Player, From, To) :-
     point(From, Player, Count), Count > 0,
     
     % Calculate target position based on player direction
-    (Player = white -> Target is From - To ; Target is To - From),
+    (Player = white -> Target is From - To ; Target is To - From), %#q is the target computation useful or even
     between(1, 24, Target),
     
     % Check target point availability
     (   point(Target, Player, _) -> true  % Can stack on own pieces
     ;   point(Target, Opponent, OppCount), 
         Opponent \= Player, 
-        OppCount =< 1 -> true  % Can hit if 1 or fewer opponents
+        OppCount =< 1 -> true  % Can hit if 1 or fewer opponents    %#q is the return true really necessary?
     ;   \+ point(Target, _, _)  % Empty point
     ),
     
     % Special case: Cannot move if pieces on bar
-    bar(Player, BarCount), BarCount =:= 0.
+    bar(Player, BarCount), BarCount =:= 0.  %#q may move to the top and replace with bar(Player, 0).
 
 % BEARING OFF
 can_bear_off(Player) :-
