@@ -49,9 +49,15 @@ TODO
 - possible issues:
 	- [ ] valid_move - target computation 
 		- why compute target if To is the target? #q 
+	- [ ] state_manager 
+		- [ ] doesnt check if moves are valid, should it? #q 
+		- [ ] move_from_bar calls apply_move(Player, bar, To). bar doesn't look like a valid argument
+			- [ ] implement the logic for placing the piece directly there or in another rule
 	- [ ] 
 - relevant logic:
 	- [ ] checking the dice numbers when figuring if a move or bearing can be made (not in game_rules yet)
 	- [ ] 
 - nice to have:
+	- [ ] state_manager:
+		- [ ] don t assert back a number of poins after a move if it drops under 0
 	- [ ] 

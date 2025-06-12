@@ -29,7 +29,7 @@ move_from_bar(Player, To) :-
     retract(bar(Player, BarCount)),
     NewBarCount is BarCount - 1,
     asserta(bar(Player, NewBarCount)),
-    apply_move(Player, bar, To).
+    apply_move(Player, bar, To).    %#q this may cause issues
 
 % BEAR OFF PIECE
 bear_off_piece(Player, Point) :-
