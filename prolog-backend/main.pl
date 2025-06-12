@@ -7,12 +7,6 @@
 %   dice_roll/1
 
 % necessary supressions for swi runtime
-:- discontiguous perform_move/3.
-:- discontiguous perform_move_from_bar/2.
-:- discontiguous perform_bear_off/2.
-:- discontiguous move_length/4.
-:- discontiguous entry_point_length/3.
-:- discontiguous bear_off_length/3.
 
 :- include('game_rules').
 :- include('state_manager').
