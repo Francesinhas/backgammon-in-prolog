@@ -13,6 +13,14 @@
     current_dice/1
 ]).
 
+:- discontiguous initial_state/0.
+:- discontiguous valid_move/3.
+:- discontiguous valid_move_with_dice/3.
+:- discontiguous can_bear_off/1.
+:- discontiguous bear_off/2.
+:- discontiguous winner/1.
+:- discontiguous dice_roll/1.
+
 :- dynamic point/3, bar/2, off/2, current_dice/1.
 
 % INITIAL BOARD SETUP
