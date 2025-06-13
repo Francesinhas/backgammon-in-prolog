@@ -1,17 +1,22 @@
 # Backgammon in Prolog
+A classic implementation of the game Backgammon, written in Prolog. This project focuses on game logic, player interactions, and board representation using declarative programming principles.
 
+## Getting started
+### 1. **Clone the repository**
+	git clone https://github.com/Francesinhas/backgammon-in-prolog.git
 
-## Set up
-### 1. **Install Prolog**
+### 2. **Install Prolog**
 
 - For Windows: Download and install [SWI-Prolog](https://www.swi-prolog.org/download/stable)
 - For macOS: `brew install swi-prolog`
 - For Linux (Debian/Ubuntu): `sudo apt-get install swi-prolog`
-
-### 2. **VS Code Setup**
-
+### 3. **Set Up Python Environment**
+	pip install pyswip
+	pip install pygame
+### 4. **Run the game**
+	python app.py
+### 5. (Optional - for development purposes) **VS Code Setup**
 - Install the "VSC-Prolog" extension by "arthwang" for VS Code. This extension provides syntax highlighting and query support.
-
 
 ## Project Structure
 ### Prolog backend
