@@ -56,27 +56,22 @@ initial_state :-
     asserta(off(black, 0)).
 
 can_bear_off_state :-
-    % Clear any previous state to ensure a clean board
     retractall(point(_, _, _)),
     retractall(bar(_, _)),
     retractall(off(_, _)),
 
-    % === White Player Setup (15 checkers) ===
     % All checkers are positioned in the home board (points 1-6).
     asserta(point(5, white, 5)),
     asserta(point(4, white, 5)),
     asserta(point(3, white, 3)),
     asserta(point(1, white, 2)),
 
-    % === Black Player Setup (15 checkers) ===
-    % Black's checkers are positioned in their own home board,
-    % out of the way for debugging white's bear off.
+    % Black's checkers are positioned in their own home board
     asserta(point(20, black, 5)),
     asserta(point(21, black, 5)),
     asserta(point(22, black, 3)),
     asserta(point(24, black, 2)),
 
-    % === Bar and Off Setup ===
     % Ensure no players have checkers on the bar or off the board.
     asserta(bar(white, 0)),
     asserta(bar(black, 0)),
@@ -84,22 +79,18 @@ can_bear_off_state :-
     asserta(off(black, 0)).
 
 black_can_bar_state :-
-    % Clear any previous state to ensure a clean board
     retractall(point(_, _, _)),
     retractall(bar(_, _)),
     retractall(off(_, _)),
 
-    % === Black Player Setup (15 checkers) ===
     asserta(bar(black, 1)),          % One black checker is ON THE BAR.
     asserta(point(24, black, 14)),   % The other 14 are on the board.
     asserta(off(black, 0)),
 
-    % === White Player Setup (15 checkers) ===
-    % Configure white's home board (the entry points for black) to test re-entry:
     asserta(point(3, white, 2)),     % Point 3 is BLOCKED.
     asserta(point(5, white, 2)),     % Point 5 is BLOCKED.
     asserta(point(4, white, 1)),     % Point 4 is a BLOT (can be hit).
-    % Points 1, 2, and 6 are completely OPEN.
+
     asserta(point(8, white, 10)),    % The rest of white's checkers are out of the way.
     asserta(bar(white, 0)),
     asserta(off(white, 0)).
@@ -162,7 +153,7 @@ validate_and_get_bear_off_die(Player, Point, UsedDie) :-
         % Find all available dice that are greater than the required distance.
         findall(D, (member(D, DiceList), D > Dist), BiggerDice),
         BiggerDice \= [],
-        % To follow standard rules, use the smallest possible die for the move.
+        % Use the smallest possible die for the move.
         sort(BiggerDice, [UsedDie|_]) % Sorts ascending and unifies UsedDie with the head.
     ).
 
