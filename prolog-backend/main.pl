@@ -36,7 +36,7 @@ perform_move_from_bar(Player, To) :-
     use_die(L).
 
 perform_bear_off(Player, Point) :-
-    bear_off(Player, Point),
+    bear_off(Player, Point),        % todo - replace check with bear_off_with_dice and then with bear_off_with_dice_real
     bear_off_piece(Player, Point),
     bear_off_length(Player, Point, L),
     use_die(L).
@@ -47,8 +47,9 @@ perform_bear_off(Player, Point) :-
 move_length(Player, From, To, L) :-
     (Player = white -> L is From - To ; L is To - From).
 
-entry_point_length(white, To, L) :- L is To.
-entry_point_length(black, To, L) :- L is 25 - To.
+entry_point_length(white, To, L) :- L is 25 - To.
+entry_point_length(black, To, L) :- L is To.
 
+% TODO Check this later
 bear_off_length(white, Point, L) :- L is Point.
 bear_off_length(black, Point, L) :- L is 25 - Point.

@@ -92,6 +92,26 @@ bear_off(Player, Point) :-
     Count > 0,
     (Player = white -> between(1, 6, Point) ; between(19, 24, Point)).
 
+bear_off_with_dice(Player, Point) :-
+    bear_off(Player, Point),
+    current_dice(DiceList),
+    (Player = white -> Dist is Point ; Dist is 25 - Point),
+    member(Dist, DiceList).
+
+% better logic, but not tested
+bear_off_with_dice_real(Player, Point) :-
+    bear_off(Player, Point),
+    current_dice(DiceList),
+    (Player = white -> Dist is Point ; Dist is 25 - Point),
+    (   member(Dist, DiceList)
+    ;   % Allow overshoot if no checkers on higher points
+        findall(P, (point(P, Player, C), C > 0, 
+                    (Player = white -> P > Point ; P < Point)), Higher),
+        Higher == [],
+        member(Bigger, DiceList),
+        Bigger > Dist
+    ).
+
 % WIN CONDITION
 winner(Player) :-
     off(Player, 15).
