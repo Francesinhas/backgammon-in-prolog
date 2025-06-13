@@ -150,8 +150,8 @@ def ai_move(player):
         return []    
 
 def has_available_moves(player):
-    moves_query = list(prolog.query(f"get_best_move({player}, Moves)."))
-    moves = moves_query[0]["Moves"] if moves_query else None
+    moves_query = list(prolog.query(f"get_best_move({player}, BestMove)."))
+    moves = moves_query[0]["BestMove"] if moves_query else None
 
     return False if moves == [] or moves is None else True
 
