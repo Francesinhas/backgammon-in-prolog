@@ -72,7 +72,7 @@ def get_current_board_state():
     ]
 def reset_board():
     # Initialize game state
-    initial_query = bool(list(prolog.query("initial_state .")))
+    initial_query = bool(list(prolog.query("initial_state.")))
 
     return get_current_board_state() if initial_query else []
 
@@ -150,8 +150,10 @@ def ai_move(player):
         return []    
 
 def has_available_moves(player):
-    query = list(prolog.query(f"get_best_move({player}, Move)."))
-    return bool(query and query[0].get("Move") != 'false')
+    moves_query = list(prolog.query(f"get_best_move({player}, Moves)."))
+    moves = moves_query[0]["Moves"] if moves_query else None
+
+    return False if moves == [] or moves is None else True
 
 def is_winner(player):
     winner_query = bool(list(prolog.query(f"winner({player})")))
