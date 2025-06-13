@@ -8,6 +8,7 @@
 :- discontiguous update_bar/2.
 :- discontiguous update_off/2.
 :- discontiguous state_to_list/1.
+:- discontiguous move_from_bar_with_dice/2.
 
 :- include('game_rules').
 
@@ -85,16 +86,3 @@ state_to_list(StateList) :-
     findall(Color-BarCount, bar(Color, BarCount), Bar),
     findall(Color-OffCount, off(Color, OffCount), Off),
     append([Points, Bar, Off], StateList).
-
-
-% helper predicates:
-
-move_length(Player, From, To, L) :-
-    (Player = white -> L is From - To ; L is To - From).
-
-entry_point_length(white, To, L) :- L is 25 - To.
-entry_point_length(black, To, L) :- L is To.
-
-% TODO Check this later
-bear_off_length(white, Point, L) :- L is Point.
-bear_off_length(black, Point, L) :- L is 25 - Point.

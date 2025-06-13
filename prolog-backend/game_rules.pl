@@ -21,6 +21,11 @@
 :- discontiguous bear_off/2.
 :- discontiguous winner/1.
 :- discontiguous dice_roll/1.
+:- discontiguous bear_off_with_dice/2.
+:- discontiguous bear_off_with_dice_real/2.
+:- discontiguous move_length/4.
+:- discontiguous entry_point_length/3.
+:- discontiguous bear_off_length/3.
 
 :- dynamic point/3, bar/2, off/2, current_dice/1.
 
@@ -127,3 +132,16 @@ dice_roll(Dice) :-
     ),
     retractall(current_dice(_)),
     assertz(current_dice(Dice)).
+
+
+% helper predicates:
+
+move_length(Player, From, To, L) :-
+    (Player = white -> L is From - To ; L is To - From).
+
+entry_point_length(white, To, L) :- L is 25 - To.
+entry_point_length(black, To, L) :- L is To.
+
+% TODO Check this later
+bear_off_length(white, Point, L) :- L is Point.
+bear_off_length(black, Point, L) :- L is 25 - Point.
