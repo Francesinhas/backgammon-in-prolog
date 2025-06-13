@@ -8,8 +8,8 @@ def get_current_board_state():
     state_query = list(prolog.query("state_to_list(StateList).", maxresult=1))
     board_state = state_query[0]["StateList"] if state_query else None
 
-    white_points = [0] * 24
-    black_points = [0] * 24
+    white_points = [0] * 25
+    black_points = [0] * 25
     bar_white = bar_black = off_white = off_black = 0
 
     for i, term in enumerate(board_state):
@@ -21,9 +21,9 @@ def get_current_board_state():
                 color = match.group(2)
                 count = int(match.group(3))
                 if color == "white":
-                    white_points[pos-1] = count
+                    white_points[pos] = count
                 else:
-                    black_points[pos-1] = count
+                    black_points[pos] = count
                 continue
 
             # Match structure bar/off terms like -(white, 0)
@@ -108,11 +108,18 @@ def perform_off_move(player, point):
     except Exception as e:
         return []
 
+def perform_move(player, fr, to):
+    if to == 27 or to == 28:
+        return perform_off_move(player, fr)
+    if fr == 25 or fr == 26:
+        return perform_bar_move(player, to)
+    return perform_regular_move(player, fr, to)
+
 reset_board()
 dice = get_dice()
 print(dice)
 #parsed_state = get_current_board_state()
-parsed_state = perform_regular_move("white", 24, 24 - dice[0])
+parsed_state = perform_move("white", 24, 24 - dice[0])
 
 # Display result
 for i in parsed_state:
