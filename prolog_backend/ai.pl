@@ -12,7 +12,6 @@
 :- discontiguous move_length/1.
 :- discontiguous bear_off_length/1.
 
-:- include('game_rules').
 :- include('state_manager').
 
 % SIMPLE AI STRATEGY
@@ -68,26 +67,6 @@ evaluate_bar_entry(Player, To, Score) :-
     ;   \+ point(To, _, _) -> Score = 1 
     ;   Score = 0
     ).
-
-
-
-% Non destructive state change checks for ai:
-can_move_from_bar_with_dice(Player, To) :-
-    bar(Player, BarCount), BarCount > 0,
-    between(1, 6, To),
-    entry_point_length(Player, To, L),
-    current_dice(Dice), member(L, Dice),
-    can_land_on(Player, To).    
-
-can_land_on(Player, To) :-
-    point(To, Player, _)                          % stack on own
-    ; point(To, Opponent, 1), Opponent \= Player  % hit blot
-    ; \+ point(To, _, _).                         % empty
-
-
-
-
-
 
 
 

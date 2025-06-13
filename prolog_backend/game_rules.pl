@@ -27,6 +27,8 @@
 :- discontiguous move_length/4.
 :- discontiguous entry_point_length/3.
 :- discontiguous bear_off_length/3.
+:- discontiguous can_move_from_bar_with_dice/2.
+:- discontiguous can_land_on/2.
 
 :- dynamic point/3, bar/2, off/2, current_dice/1.
 
@@ -184,6 +186,19 @@ bear_off_with_dice_real(Player, Point) :-
         member(Bigger, DiceList),
         Bigger > Dist
     ).
+
+% MOVE FROM BAR 
+can_move_from_bar_with_dice(Player, To) :-
+    bar(Player, BarCount), BarCount > 0,
+    between(1, 6, To),
+    entry_point_length(Player, To, L),
+    current_dice(Dice), member(L, Dice),
+    can_land_on(Player, To).    
+
+can_land_on(Player, To) :-
+    point(To, Player, _)                          % stack on own
+    ; point(To, Opponent, 1), Opponent \= Player  % hit blot
+    ; \+ point(To, _, _).                         % empty
 
 % WIN CONDITION
 winner(Player) :-
