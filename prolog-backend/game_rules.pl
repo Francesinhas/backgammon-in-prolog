@@ -137,8 +137,10 @@ dice_roll(Dice) :-
 move_length(Player, From, To, L) :-
     (Player = white -> L is From - To ; L is To - From).
 
-entry_point_length(white, To, L) :- L is 25 - To.
-entry_point_length(black, To, L) :- L is To.
+entry_point_length(white, To, L) :-
+    ( ground([To]) -> L is 25 - To ; fail ).
+entry_point_length(black, To, L) :-
+    ( ground([To]) -> L is To ; fail ).
 
 % TODO Check this later
 bear_off_length(white, Point, L) :- L is Point.
