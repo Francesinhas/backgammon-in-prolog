@@ -190,7 +190,8 @@ bear_off_with_dice_real(Player, Point) :-
 % MOVE FROM BAR 
 can_move_from_bar_with_dice(Player, To) :-
     bar(Player, BarCount), BarCount > 0,
-    between(1, 6, To),
+    entry_range(Player, Min, Max),
+    between(Min, Max, To),
     entry_point_length(Player, To, L),
     current_dice(Dice), member(L, Dice),
     can_land_on(Player, To).    
@@ -230,3 +231,6 @@ entry_point_length(black, To, L) :-
 % TODO Check this later
 bear_off_length(white, Point, L) :- L is Point.
 bear_off_length(black, Point, L) :- L is 25 - Point.
+
+entry_range(white, 19, 24).
+entry_range(black, 1, 6).
