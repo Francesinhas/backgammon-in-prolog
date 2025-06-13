@@ -13,9 +13,9 @@
 :- include('ai').
 
 
-available_moves(Player, Moves) :-   % todo also include moving from bar and bearing off
+has_available_moves(Player, Moves) :-   % todo also include moving from bar and bearing off
     findall(move(From, To), choose_move_with_dice(Player, move(From, To)), RawMoves),
-    list_to_set(RawMoves, Moves).  % avoid duplicates
+    list_to_set(RawMoves, Moves). 
 
 ai_turn(Player) :-
     choose_move_with_dice(Player, move(From, To)),

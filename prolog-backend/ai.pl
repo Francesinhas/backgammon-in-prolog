@@ -1,6 +1,5 @@
 % Basic AI implementation
 % Simple rule-based strategy inspired by: 
-% https://github.com/rlg2161/Backgammon/blob/master/agents.py
 
 :- discontiguous use_die/1.
 :- discontiguous land_on/2.
@@ -41,6 +40,14 @@ evaluate_move(Player, Dice, move(From, To), Score) :-
     ;   Player = black, From < To -> Score = 1   % Move forward
     ;   Score = 0  % Default
     ).
+
+
+
+
+
+
+
+
 
 % EVALUATE MOVES (simple heuristic) - not used!
 evaluate_moves(Player, Moves, Dice, Scores) :-

@@ -1,6 +1,4 @@
 % Backgammon rules implementation
-% Based on Tesauro's encoding scheme from gym-backgammon
-% Reference: https://github.com/dellalibera/gym-backgammon
 
 % ATTEMPT TO USE MODULES to prevent discontigous errors
 % :- module(game_rules, [
