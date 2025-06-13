@@ -52,8 +52,11 @@ initial_state :-
 % MOVE VALIDATION
 valid_move(Player, From, To) :-
     point(From, Player, Count), Count > 0,  % Own piece exists
-    % nonvar(From), nonvar(To),  % <-- Ensure they're both instantiated
-    (Player = white -> To < From ; To > From),  % Direction check
+    % Only check direction if From and To are both instantiated,
+    (   ground([From, To])
+    ->  (Player = white -> To < From ; To > From)
+    ;   true  % Defer if not yet known
+    ),
     between(1, 24, To),  % Valid board position
     bar(Player, 0),  % No pieces on bar
     (   point(To, Player, _)        % Can land on own pieces
@@ -65,10 +68,13 @@ valid_move(Player, From, To) :-
 
 % MOVE VALIDATION WITH DICE CHECK
 valid_move_with_dice(Player, From, To) :-
-    current_dice(DiceList),
     valid_move(Player, From, To),
-    (Player = white -> Length is From - To ; Length is To - From),
-    member(Length, DiceList).
+    current_dice(DiceList),
+    (   ground([From, To])
+    ->  (Player = white -> Diff is From - To ; Diff is To - From),
+        member(Diff, DiceList)
+    ;   fail  % Avoid unsafe evaluation
+    ).
 
 % BEARING OFF
 can_bear_off(Player) :-
