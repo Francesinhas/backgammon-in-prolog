@@ -149,11 +149,12 @@ def ai_move(player):
     except Exception as e:
         return []    
 
-def has_available_moves():
-    moves_query = list(prolog.query("get_best_move(white, Moves)."))
+def has_available_moves(player):
+    moves_query = list(prolog.query(f"get_best_move({player}, Moves)."))
     moves = moves_query[0]["Moves"] if moves_query else None
 
     return False if len(moves) == 0 else True
+
 
 
 # Testing
