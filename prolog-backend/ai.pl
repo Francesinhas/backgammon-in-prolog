@@ -6,6 +6,16 @@
 :- include('state_manager').
 
 % SIMPLE AI STRATEGY
+choose_move_with_dice(Player, Move) :-
+    findall(From-To, valid_move_with_dice(Player, From, To), Moves),
+    (Moves = [] 
+     -> Move = none  % No moves available
+     ;  maplist(wrap_and_evaluate(Player, Dice), Moves, Scores),
+        max_member(Score-BestMove, Scores),
+        Move = BestMove
+    ).
+
+% SIMPLE AI STRATEGY - the dice is not taken into account - not used!
 choose_move(Player, Dice, Move) :-
     findall(From-To, valid_move(Player, From, To), Moves),
     (Moves = [] 
@@ -18,10 +28,6 @@ choose_move(Player, Dice, Move) :-
 wrap_and_evaluate(Player, Dice, From-To, Score-move(From, To)) :-
     evaluate_move(Player, Dice, move(From, To), Score).
 
-% EVALUATE MOVES (simple heuristic)
-evaluate_moves(Player, Moves, Dice, Scores) :-
-    maplist(evaluate_move(Player, Dice), Moves, Scores).
-
 evaluate_move(Player, Dice, move(From, To), Score) :-
     % Basic strategy priorities:
     % 1. Hitting opponent blots
@@ -33,6 +39,10 @@ evaluate_move(Player, Dice, move(From, To), Score) :-
     ;   Player = black, From < To -> Score = 1   % Move forward
     ;   Score = 0  % Default
     ).
+
+% EVALUATE MOVES (simple heuristic) - not used!
+evaluate_moves(Player, Moves, Dice, Scores) :-
+    maplist(evaluate_move(Player, Dice), Moves, Scores).
 
 % MINIMAX SKELETON (for future implementation)
 % minimax(State, Depth, Move, Eval) :-
