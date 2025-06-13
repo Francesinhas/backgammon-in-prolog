@@ -42,7 +42,7 @@ perform_move_from_bar(Player, To) :-
     use_die(L).
 
 perform_bear_off(Player, Point) :-
-    bear_off(Player, Point),        % todo - replace check with bear_off_with_dice and then with bear_off_with_dice_real
+    bear_off_with_dice(Player, Point),        % todo - replace check with bear_off_with_dice and then with bear_off_with_dice_real
     bear_off_piece(Player, Point),
     bear_off_length(Player, Point, L),
     use_die(L).
