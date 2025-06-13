@@ -15,7 +15,7 @@ def get_current_board_state():
 
     #bar_white = bar_black = off_white = off_black = 0
 
-    print(board_state)
+    #print(board_state)
 
     for i, term in enumerate(board_state):
         try:
@@ -34,10 +34,10 @@ def get_current_board_state():
             # Match structure bar/off terms like -(white, 0)
             match_bar_or_off = re.match(r"-\((white|black),\s*(\d+)", term)
             if match_bar_or_off:
-                print(f"TERM[{i}] = {repr(term)}")
+                #print(f"TERM[{i}] = {repr(term)}")
                 color = match_bar_or_off.group(1)
                 count = int(match_bar_or_off.group(2))
-                print(f"[{color},{count}]")
+                #print(f"[{color},{count}]")
 
                 if i == len(board_state)-4:
                     bar[color] = count
@@ -54,14 +54,14 @@ def get_current_board_state():
             print(f"Unrecognized term: {term}")
         except Exception as e:
             print(f"Error parsing term: {term} -> {e}")
-    print([
-        white_points,
-        black_points,
-        bar["white"],
-        bar["black"],
-        off["white"],
-        off["black"]
-    ])
+    # print([
+    #     white_points,
+    #     black_points,
+    #     bar["white"],
+    #     bar["black"],
+    #     off["white"],
+    #     off["black"]
+    # ])
     return [
         white_points,
         black_points,
@@ -106,7 +106,7 @@ def perform_bar_move(player, to):
         q = prolog.query(f"perform_move_from_bar({player},{to}).")
         result = next(q, None)
         q.close()
-        print(result)
+        #print(result)
 
         if result is not None:
             return get_current_board_state()
@@ -129,7 +129,7 @@ def perform_off_move(player, point):
         return []
 
 def perform_move(player, fr, to):
-    print(f"[{player},{fr},{to}]")
+    #print(f"[{player},{fr},{to}]")
     if to == 27 or to == 28:
         return perform_off_move(player, fr)
     if fr == 25 or fr == 26:
@@ -149,11 +149,19 @@ def ai_move(player):
     except Exception as e:
         return []    
 
+def has_available_moves():
+    moves_query = list(prolog.query("has_available_moves(white, Moves)."))
+    moves = moves_query[0]["Moves"] if moves_query else None
+
+    return False if len(moves) == 0 else True
+
+
 # Testing
 # reset_board()
 # roll_dice()
 # dice = get_dice()
 # print(dice)
+# print(has_available_moves())
 # #parsed_state = get_current_board_state()
 # parsed_state = perform_move("white", 24, 24 - dice[0])
 
