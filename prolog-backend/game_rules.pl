@@ -80,6 +80,27 @@ can_bear_off_state :-
     asserta(off(white, 0)),
     asserta(off(black, 0)).
 
+black_can_bar_state :-
+    % Clear any previous state to ensure a clean board
+    retractall(point(_, _, _)),
+    retractall(bar(_, _)),
+    retractall(off(_, _)),
+
+    % === Black Player Setup (15 checkers) ===
+    asserta(bar(black, 1)),          % One black checker is ON THE BAR.
+    asserta(point(24, black, 14)),   % The other 14 are on the board.
+    asserta(off(black, 0)),
+
+    % === White Player Setup (15 checkers) ===
+    % Configure white's home board (the entry points for black) to test re-entry:
+    asserta(point(3, white, 2)),     % Point 3 is BLOCKED.
+    asserta(point(5, white, 2)),     % Point 5 is BLOCKED.
+    asserta(point(4, white, 1)),     % Point 4 is a BLOT (can be hit).
+    % Points 1, 2, and 6 are completely OPEN.
+    asserta(point(8, white, 10)),    % The rest of white's checkers are out of the way.
+    asserta(bar(white, 0)),
+    asserta(off(white, 0)).
+
 % MOVE VALIDATION
 valid_move(Player, From, To) :-
     point(From, Player, Count), Count > 0,  % Own piece exists
