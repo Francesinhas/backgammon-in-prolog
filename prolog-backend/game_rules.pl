@@ -52,6 +52,34 @@ initial_state :-
     asserta(off(white, 0)),
     asserta(off(black, 0)).
 
+can_bear_off_state :-
+    % Clear any previous state to ensure a clean board
+    retractall(point(_, _, _)),
+    retractall(bar(_, _)),
+    retractall(off(_, _)),
+
+    % === White Player Setup (15 checkers) ===
+    % All checkers are positioned in the home board (points 1-6).
+    asserta(point(5, white, 5)),
+    asserta(point(4, white, 5)),
+    asserta(point(3, white, 3)),
+    asserta(point(1, white, 2)),
+
+    % === Black Player Setup (15 checkers) ===
+    % Black's checkers are positioned in their own home board,
+    % out of the way for debugging white's bear off.
+    asserta(point(20, black, 5)),
+    asserta(point(21, black, 5)),
+    asserta(point(22, black, 3)),
+    asserta(point(24, black, 2)),
+
+    % === Bar and Off Setup ===
+    % Ensure no players have checkers on the bar or off the board.
+    asserta(bar(white, 0)),
+    asserta(bar(black, 0)),
+    asserta(off(white, 0)),
+    asserta(off(black, 0)).
+
 % MOVE VALIDATION
 valid_move(Player, From, To) :-
     point(From, Player, Count), Count > 0,  % Own piece exists
@@ -96,10 +124,18 @@ bear_off(Player, Point) :-
     (Player = white -> between(1, 6, Point) ; between(19, 24, Point)).
 
 bear_off_with_dice(Player, Point) :-
+    % 1. Check if the player is in a state to bear off from this point
     bear_off(Player, Point),
+
+    % 2. Check if the required die is available in the current roll
     current_dice(DiceList),
     (Player = white -> Dist is Point ; Dist is 25 - Point),
-    member(Dist, DiceList).
+    member(Dist, DiceList),
+
+    % 3. Execute the move: remove the checker from the point and update the 'off' count
+    retract(point(Point, Player, Count)),
+    NewCount is Count - 1,
+    (NewCount > 0 -> asserta(point(Point, Player, NewCount)) ; true). % Re-assert the point only if checkers remain
 
 % better logic, but not tested
 bear_off_with_dice_real(Player, Point) :-
