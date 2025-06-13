@@ -95,6 +95,52 @@ black_can_bar_state :-
     asserta(bar(white, 0)),
     asserta(off(white, 0)).
 
+can_leave_bar_state :-
+    % Clear previous state
+    retractall(point(_, _, _)),
+    retractall(bar(_, _)),
+    retractall(off(_, _)),
+    retractall(current_dice(_)),
+
+    % Black owns all points in their home board (19 to 24) with 2+ pieces each
+    asserta(point(19, black, 2)),
+    asserta(point(20, black, 2)),
+    asserta(point(21, black, 2)),
+    asserta(point(22, black, 2)),
+    asserta(point(23, black, 2)),
+    asserta(point(24, black, 2)),
+
+    % White has 2 pieces on the bar
+    asserta(bar(white, 2)),
+
+    % Black has nothing on the bar, and no pieces borne off
+    asserta(bar(black, 0)),
+    asserta(off(white, 0)),
+    asserta(off(black, 0)).
+
+can_leave_bar_state2 :-
+    % Clear previous state
+    retractall(point(_, _, _)),
+    retractall(bar(_, _)),
+    retractall(off(_, _)),
+    retractall(current_dice(_)),
+
+    % Black owns all points in their home board (19 to 24) with 2+ pieces each
+    asserta(point(19, black, 1)),
+    asserta(point(20, black, 1)),
+    asserta(point(21, black, 1)),
+    asserta(point(22, black, 1)),
+    asserta(point(23, black, 1)),
+    asserta(point(24, black, 1)),
+
+    % White has 2 pieces on the bar
+    asserta(bar(white, 2)),
+
+    % Black has nothing on the bar, and no pieces borne off
+    asserta(bar(black, 0)),
+    asserta(off(white, 0)),
+    asserta(off(black, 0)).
+
 % MOVE VALIDATION
 valid_move(Player, From, To) :-
     point(From, Player, Count), Count > 0,  % Own piece exists
