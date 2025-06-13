@@ -2,7 +2,7 @@ from pyswip import Prolog, Variable
 import re
 
 prolog = Prolog()
-prolog.consult("/prolog-backend/main.pl")
+prolog.consult("./prolog-backend/main.pl")
 
 def get_current_board_state():
     state_query = list(prolog.query("state_to_list(StateList).", maxresult=1))
