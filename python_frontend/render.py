@@ -1,5 +1,6 @@
 import pygame
 import sys
+from bridge import get_current_board_state, roll_dice, get_dice, perform_move
 
 # --- Constants ---
 WINDOW_WIDTH = 900
@@ -18,28 +19,29 @@ DICE_SIZE = 50
 DICE_GAP = 10
 DICE_FONT_SIZE = 28
 
-# Special point indices (shifted to follow 1-based point indices)
 BAR_WHITE_IDX = 25
 BAR_BLACK_IDX = 26
 OFF_WHITE_IDX = 27
 OFF_BLACK_IDX = 28
 
-# Derived layout
 TOTAL_PLAY_WIDTH = 2 * NUM_TRIANGLES_PER_SIDE * POINT_WIDTH + BAR_WIDTH
 MARGIN_X = (WINDOW_WIDTH - TOTAL_PLAY_WIDTH) // 2
 LEFT_ZONE_START = MARGIN_X
 BAR_START_X = LEFT_ZONE_START + NUM_TRIANGLES_PER_SIDE * POINT_WIDTH
 RIGHT_ZONE_START = BAR_START_X + BAR_WIDTH
 
-# Move state
 selected_from = None
 selected_to = None
 show_popup = False
 popup_rect = pygame.Rect(WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50, 400, 100)
 confirm_button_rect = pygame.Rect(popup_rect.centerx - 60, popup_rect.y + 50, 120, 30)
+roll_button_rect = pygame.Rect(WINDOW_WIDTH // 2 - 75, 20, 150, 40)
+show_invalid_move_popup = False
+invalid_popup_timer = 0
+has_rolled_dice = False
 
 def get_point_x(index):
-    index -= 1  # shift 1-based index to 0-based for layout
+    index -= 1
     if index < 6:
         return RIGHT_ZONE_START + (5 - index) * POINT_WIDTH
     elif index < 12:
@@ -148,22 +150,11 @@ def draw_triangle_buttons(screen, selected_from, selected_to):
         color = (255, 255, 0, 80) if selected_from == idx else (0, 0, 255, 80) if selected_to == idx else (0, 0, 0, 0)
         draw_rect(rect, color)
 
-def move_label(idx):
-    if idx == BAR_WHITE_IDX:
-        return "bar (white)"
-    if idx == BAR_BLACK_IDX:
-        return "bar (black)"
-    if idx == OFF_WHITE_IDX:
-        return "off (white)"
-    if idx == OFF_BLACK_IDX:
-        return "off (black)"
-    return str(idx)
-
 def draw_popup(screen, from_idx, to_idx):
     pygame.draw.rect(screen, (240, 240, 240), popup_rect)
     pygame.draw.rect(screen, (0, 0, 0), popup_rect, 2)
     font = pygame.font.SysFont(None, 24)
-    text = f"Confirm move from {move_label(from_idx)} to {move_label(to_idx)}?"
+    text = f"Confirm move from {from_idx} to {to_idx}?"
     rendered = font.render(text, True, (0, 0, 0))
     text_rect = rendered.get_rect(center=(popup_rect.centerx, popup_rect.y + 30))
     screen.blit(rendered, text_rect)
@@ -173,8 +164,25 @@ def draw_popup(screen, from_idx, to_idx):
     confirm_text_rect = confirm_text.get_rect(center=confirm_button_rect.center)
     screen.blit(confirm_text, confirm_text_rect)
 
-def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_black, dice_values):
-    global selected_from, selected_to, show_popup
+def draw_invalid_move_popup(screen):
+    popup = pygame.Rect(WINDOW_WIDTH // 2 - 150, WINDOW_HEIGHT // 2 - 30, 300, 60)
+    pygame.draw.rect(screen, (255, 200, 200), popup)
+    pygame.draw.rect(screen, (200, 0, 0), popup, 2)
+    font = pygame.font.SysFont(None, 28)
+    text = font.render("Invalid move!", True, (200, 0, 0))
+    screen.blit(text, text.get_rect(center=popup.center))
+
+def main():
+    global selected_from, selected_to, show_popup, show_invalid_move_popup, invalid_popup_timer, has_rolled_dice
+
+    state = get_current_board_state()
+    if not state:
+        print("Failed to load board state.")
+        return
+    dice_values = []  # Don't show dice before rolling
+
+    white_checkers, black_checkers, bar_white, bar_black, off_white, off_black = state
+
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Backgammon")
@@ -182,22 +190,36 @@ def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_bl
 
     running = True
     while running:
+        current_time = pygame.time.get_ticks()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = pygame.mouse.get_pos()
-                if show_popup:
+                if roll_button_rect.collidepoint(pos) and not has_rolled_dice:
+                    roll_dice()
+                    dice_values = get_dice()
+                    has_rolled_dice = True
+                elif show_popup and selected_from is not None and selected_to is not None:
                     if confirm_button_rect.collidepoint(pos):
-                        print(f"Confirmed move from {move_label(selected_from)} to {move_label(selected_to)}")
+                        fr = 25 if selected_from == BAR_WHITE_IDX else selected_from
+                        to = 27 if selected_to == OFF_WHITE_IDX else selected_to
+                        updated = perform_move("white", fr, to)
+                        if updated:
+                            white_checkers, black_checkers, bar_white, bar_black, off_white, off_black = updated
+                            dice_values = get_dice()
+                        else:
+                            show_invalid_move_popup = True
+                            invalid_popup_timer = current_time
                         selected_from = None
                         selected_to = None
                         show_popup = False
                 else:
-                    found = False
                     for i in range(1, 25):
                         if get_triangle_rect(i).collidepoint(pos):
                             if selected_from is None:
@@ -205,34 +227,35 @@ def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_bl
                             elif selected_to is None:
                                 selected_to = i
                                 show_popup = True
-                            found = True
                             break
-                    if not found:
-                        if get_bar_rect(True).collidepoint(pos):
-                            if selected_from is None:
-                                selected_from = BAR_WHITE_IDX
-                                found = True
-                        elif get_bar_rect(False).collidepoint(pos):
-                            if selected_from is None:
-                                selected_from = BAR_BLACK_IDX
-                                found = True
-                    if not found and selected_from is not None:
-                        if get_off_rect(True).collidepoint(pos):
-                            if selected_to is None:
-                                selected_to = OFF_WHITE_IDX
-                                show_popup = True
-                        elif get_off_rect(False).collidepoint(pos):
-                            if selected_to is None:
-                                selected_to = OFF_BLACK_IDX
-                                show_popup = True
+                    if get_bar_rect(True).collidepoint(pos):
+                        if selected_from is None:
+                            selected_from = BAR_WHITE_IDX
+                    elif get_off_rect(True).collidepoint(pos):
+                        if selected_from is not None and selected_to is None:
+                            selected_to = OFF_WHITE_IDX
+                            show_popup = True
 
         draw_board(screen)
         draw_checkers(screen, white_checkers, black_checkers)
         draw_bar_and_off(screen, bar_white, bar_black, off_white, off_black)
-        draw_dice(screen, dice_values)
+        if has_rolled_dice:
+            draw_dice(screen, dice_values)
         draw_triangle_buttons(screen, selected_from, selected_to)
-        if show_popup and selected_from is not None and selected_to is not None:
+
+        pygame.draw.rect(screen, (173, 216, 230) if not has_rolled_dice else (200, 200, 200), roll_button_rect)
+        pygame.draw.rect(screen, (0, 0, 0), roll_button_rect, 2)
+        font = pygame.font.SysFont(None, 24)
+        roll_text = font.render("Roll Dice", True, (0, 0, 0))
+        screen.blit(roll_text, roll_text.get_rect(center=roll_button_rect.center))
+
+        if show_popup:
             draw_popup(screen, selected_from, selected_to)
+
+        if show_invalid_move_popup and current_time - invalid_popup_timer < 1500:
+            draw_invalid_move_popup(screen)
+        else:
+            show_invalid_move_popup = False
 
         pygame.display.flip()
         clock.tick(30)
@@ -240,20 +263,4 @@ def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_bl
     pygame.quit()
 
 if __name__ == "__main__":
-    white = [0] * 29
-    black = [0] * 29
-    white[1] = 2
-    white[12] = 5
-    white[17] = 3
-    black[24] = 2
-    black[13] = 5
-    black[8] = 3
-
-    bar_white = 2
-    bar_black = 3
-    off_white = 6
-    off_black = 4
-
-    dice = [6, 6, 6, 6]
-
-    main(white, black, bar_white, bar_black, off_white, off_black, dice)
+    main()
