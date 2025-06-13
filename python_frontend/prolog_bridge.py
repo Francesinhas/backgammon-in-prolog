@@ -2,7 +2,7 @@ from pyswip import Prolog, Variable
 import re
 
 prolog = Prolog()
-prolog.consult("./prolog-backend/main.pl")
+prolog.consult("./prolog_backend/main.pl")
 
 def get_current_board_state():
     state_query = list(prolog.query("state_to_list(StateList).", maxresult=1))
@@ -153,7 +153,8 @@ def has_available_moves(player):
     moves_query = list(prolog.query(f"get_best_move({player}, BestMove)."))
     moves = moves_query[0]["BestMove"] if moves_query else None
 
-    return False if moves == [] or moves is None else True
+    
+    return False if moves ==  "false" or moves is None else True
 
 def is_winner(player):
     winner_query = bool(list(prolog.query(f"winner({player})")))
@@ -176,3 +177,4 @@ def is_winner(player):
 
 # dice = get_dice()
 # print(dice)
+# print(has_available_moves("white"))
