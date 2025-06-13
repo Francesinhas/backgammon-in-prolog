@@ -17,7 +17,7 @@
 :- include('state_manager').
 
 % SIMPLE AI STRATEGY
-choose_move_with_dice_good(Player, Move) :-
+choose_move_with_dice(Player, Move) :-
     generate_ai_moves(Player, ScoredMoves),
     select_best_move(ScoredMoves, Move).
 
@@ -29,7 +29,7 @@ generate_ai_moves(Player, ScoredMoves) :-
     ).
 
 generate_bar_entry_moves(Player, ScoredMoves) :-
-    findall(To, move_from_bar_with_dice(Player, To), EntryPoints),
+    findall(To, can_move_from_bar_with_dice(Player, To), EntryPoints),
     maplist(wrap_bar_move(Player), EntryPoints, ScoredMoves).
 
 generate_normal_moves(Player, ScoredMoves) :-
@@ -72,10 +72,31 @@ evaluate_bar_entry(Player, To, Score) :-
 
 
 
+% Non destructive state change checks for ai:
+can_move_from_bar_with_dice(Player, To) :-
+    bar(Player, BarCount), BarCount > 0,
+    between(1, 6, To),
+    entry_point_length(Player, To, L),
+    current_dice(Dice), member(L, Dice),
+    can_land_on(Player, To).    
+
+can_land_on(Player, To) :-
+    point(To, Player, _)                          % stack on own
+    ; point(To, Opponent, 1), Opponent \= Player  % hit blot
+    ; \+ point(To, _, _).                         % empty
 
 
 
-choose_move_with_dice(Player, Move) :-  % not taking bearing off and bar into account - not used!
+
+
+
+
+
+
+
+
+
+choose_move_with_dice_old(Player, Move) :-  % not taking bearing off and bar into account - not used!
     findall(From-To, valid_move_with_dice(Player, From, To), Moves),
     (Moves = [] 
         -> Move = none  % No moves available
