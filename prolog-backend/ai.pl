@@ -15,16 +15,6 @@ choose_move_with_dice(Player, Move) :-
         Move = BestMove
     ).
 
-% SIMPLE AI STRATEGY - the dice is not taken into account - not used!
-choose_move(Player, Dice, Move) :-
-    findall(From-To, valid_move(Player, From, To), Moves),
-    (Moves = [] 
-     -> Move = none  % No moves available
-     ;  maplist(wrap_and_evaluate(Player, Dice), Moves, Scores),
-        max_member(Score-BestMove, Scores),
-        Move = BestMove
-    ).
-
 wrap_and_evaluate(Player, Dice, From-To, Score-move(From, To)) :-
     evaluate_move(Player, Dice, move(From, To), Score).
 
@@ -43,6 +33,16 @@ evaluate_move(Player, Dice, move(From, To), Score) :-
 % EVALUATE MOVES (simple heuristic) - not used!
 evaluate_moves(Player, Moves, Dice, Scores) :-
     maplist(evaluate_move(Player, Dice), Moves, Scores).
+
+% SIMPLE AI STRATEGY - the dice is not taken into account - not used!
+choose_move(Player, Dice, Move) :-
+    findall(From-To, valid_move(Player, From, To), Moves),
+    (Moves = [] 
+     -> Move = none  % No moves available
+     ;  maplist(wrap_and_evaluate(Player, Dice), Moves, Scores),
+        max_member(Score-BestMove, Scores),
+        Move = BestMove
+    ).
 
 % MINIMAX SKELETON (for future implementation)
 % minimax(State, Depth, Move, Eval) :-

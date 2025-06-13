@@ -51,17 +51,11 @@ initial_state :-
 
 % MOVE VALIDATION
 valid_move(Player, From, To) :-
-
     point(From, Player, Count), Count > 0,  % Own piece exists
-
     % nonvar(From), nonvar(To),  % <-- Ensure they're both instantiated
-
     (Player = white -> To < From ; To > From),  % Direction check
-
     between(1, 24, To),  % Valid board position
-
     bar(Player, 0),  % No pieces on bar
-    
     (   point(To, Player, _)        % Can land on own pieces
     ;   point(To, Opponent, OppCount), % Can hit single opponent
         OppCount =< 1,     
