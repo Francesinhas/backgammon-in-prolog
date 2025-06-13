@@ -14,7 +14,7 @@ A classic implementation of the game Backgammon, written in Prolog. This project
 	pip install pyswip
 	pip install pygame
 ### 4. **Run the game**
-	python app.py
+	python3 python_frontend/app.py
 ### 5. (Optional - for development purposes) **VS Code Setup**
 - Install the "VSC-Prolog" extension by "arthwang" for VS Code. This extension provides syntax highlighting and query support.
 
