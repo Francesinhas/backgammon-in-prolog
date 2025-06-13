@@ -160,6 +160,7 @@ def is_winner(player):
 
     return winner_query
 
+
 # Testing
 # reset_board()
 # roll_dice()
