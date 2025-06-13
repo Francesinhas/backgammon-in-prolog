@@ -155,6 +155,10 @@ def has_available_moves(player):
 
     return False if len(moves) == 0 else True
 
+def is_winner(player):
+    winner_query = bool(list(prolog.query(f"winner({player})")))
+
+    return winner_query
 
 
 # Testing
@@ -162,7 +166,7 @@ def has_available_moves(player):
 # roll_dice()
 # dice = get_dice()
 # print(dice)
-# print(has_available_moves())
+# print(has_available_moves("white"))
 # #parsed_state = get_current_board_state()
 # parsed_state = perform_move("white", 24, 24 - dice[0])
 
