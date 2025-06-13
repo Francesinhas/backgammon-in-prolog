@@ -42,6 +42,7 @@ perform_move(Player, From, To) :-
 perform_move_from_bar(Player, To) :-
     bar(Player, BarCount), BarCount > 0,
     entry_point_length(Player, To, L),
+    can_move_from_bar_with_dice(Player, To),
     move_from_bar_with_dice(Player, To),
     use_die(L).
 
