@@ -17,28 +17,57 @@
 :- include('state_manager').
 
 % SIMPLE AI STRATEGY
-choose_move_with_dice(Player, Move) :-
-    findall(From-To, valid_move_with_dice(Player, From, To), Moves),
-    (Moves = [] 
-     -> Move = none  % No moves available
-     ;  maplist(wrap_and_evaluate(Player, Dice), Moves, Scores),
-        max_member(Score-BestMove, Scores),
-        Move = BestMove
+choose_move_with_dice_good(Player, Move) :-
+    generate_ai_moves(Player, ScoredMoves),
+    select_best_move(ScoredMoves, Move).
+
+generate_ai_moves(Player, ScoredMoves) :-
+    bar(Player, Count),
+    (   Count > 0
+    ->  generate_bar_entry_moves(Player, ScoredMoves)
+    ;   generate_normal_moves(Player, ScoredMoves)
     ).
 
-wrap_and_evaluate(Player, Dice, From-To, Score-move(From, To)) :-
-    evaluate_move(Player, Dice, move(From, To), Score).
+generate_bar_entry_moves(Player, ScoredMoves) :-
+    findall(To, move_from_bar_with_dice(Player, To), EntryPoints),
+    maplist(wrap_bar_move(Player), EntryPoints, ScoredMoves).
 
-evaluate_move(Player, Dice, move(From, To), Score) :-
+generate_normal_moves(Player, ScoredMoves) :-
+    findall(From-To, valid_move_with_dice(Player, From, To), Moves),
+    maplist(wrap_and_evaluate(Player), Moves, ScoredMoves).
+
+select_best_move([], none).
+select_best_move(ScoredMoves, Move) :-
+    max_member(_Score-Move, ScoredMoves).
+
+
+wrap_and_evaluate(Player, From-To, Score-move(From, To)) :-
+    evaluate_move(Player, move(From, To), Score).
+
+evaluate_move(Player, move(From, To), Score) :-
     % Basic strategy priorities:
     % 1. Hitting opponent blots
     % 2. Making points (creating anchors)
     % 3. Moving back checkers
-    (   point(To, Opponent, 1), Opponent \= Player -> Score = 3  % Hit opponent
-    ;   \+ point(To, _, _) -> Score = 2  % Make new point
-    ;   Player = white, From > To -> Score = 1  % Move forward
-    ;   Player = black, From < To -> Score = 1   % Move forward
-    ;   Score = 0  % Default
+    (   point(To, Opponent, 1), Opponent \= Player -> Score = 3
+    ;   point(To, Player, _) -> Score = 2
+    ;   \+ point(To, _, _) -> Score = 1
+    ;   Score = 0
+    ).
+
+
+wrap_bar_move(Player, To, Score-move(bar, To)) :-
+    evaluate_bar_entry(Player, To, Score).
+
+evaluate_bar_entry(Player, To, Score) :-
+    % Basic strategy priorities:
+    % 3p. Hitting opponent blots
+    % 2p. Making points (creating anchors)
+    % 1p. Exposing single blot
+    (   point(To, Opponent, 1), Opponent \= Player -> Score = 3  
+    ;   point(To, Player, _) -> Score = 2 
+    ;   \+ point(To, _, _) -> Score = 1 
+    ;   Score = 0
     ).
 
 
@@ -46,22 +75,15 @@ evaluate_move(Player, Dice, move(From, To), Score) :-
 
 
 
-
-
-
-% EVALUATE MOVES (simple heuristic) - not used!
-evaluate_moves(Player, Moves, Dice, Scores) :-
-    maplist(evaluate_move(Player, Dice), Moves, Scores).
-
-% SIMPLE AI STRATEGY - the dice is not taken into account - not used!
-choose_move(Player, Dice, Move) :-
-    findall(From-To, valid_move(Player, From, To), Moves),
+choose_move_with_dice(Player, Move) :-  % not taking bearing off and bar into account - not used!
+    findall(From-To, valid_move_with_dice(Player, From, To), Moves),
     (Moves = [] 
-     -> Move = none  % No moves available
-     ;  maplist(wrap_and_evaluate(Player, Dice), Moves, Scores),
+        -> Move = none  % No moves available
+        ;  maplist(wrap_and_evaluate(Player), Moves, Scores),
         max_member(Score-BestMove, Scores),
         Move = BestMove
     ).
+
 
 % MINIMAX SKELETON (for future implementation)
 % minimax(State, Depth, Move, Eval) :-
