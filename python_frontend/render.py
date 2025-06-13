@@ -2,9 +2,7 @@
 import pygame
 from constants import *
 
-# --------------------------------------------------------------------------- #
-#  Geometry helpers                                                           #
-# --------------------------------------------------------------------------- #
+
 def get_point_x(idx: int) -> int:
     idx -= 1
     if idx < 6:      return RIGHT_ZONE_START + (5  - idx) * POINT_WIDTH
@@ -32,9 +30,6 @@ def get_off_rect(is_white: bool) -> pygame.Rect:
     return pygame.Rect(x, y, POINT_WIDTH, POINT_HEIGHT)
 
 
-# --------------------------------------------------------------------------- #
-#  Drawing helpers                                                            #
-# --------------------------------------------------------------------------- #
 def draw_board(screen):
     screen.fill(BOARD_COLOR)
     for i in range(1, 25):
@@ -138,10 +133,6 @@ def draw_invalid_move_popup(screen):
     txt  = font.render("Invalid move!", True, (200, 0, 0))
     screen.blit(txt, txt.get_rect(center=pop.center))
 
-
-# --------------------------------------------------------------------------- #
-#  NEW : “no moves” modal popup                                               #
-# --------------------------------------------------------------------------- #
 def draw_no_moves_popup(screen, player: str):
     pygame.draw.rect(screen, (240, 240, 240), no_moves_popup_rect)
     pygame.draw.rect(screen, (0, 0, 0),       no_moves_popup_rect, 2)
@@ -156,3 +147,12 @@ def draw_no_moves_popup(screen, player: str):
     label = "Pass Turn" if player == "white" else "Continue"
     btn   = font.render(label, True, (0, 0, 0))
     screen.blit(btn, btn.get_rect(center=no_moves_button_rect.center))
+
+def draw_winner_popup(screen, player: str):
+    popup = pygame.Rect(WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 60, 400, 120)
+    pygame.draw.rect(screen, (220, 255, 220), popup)
+    pygame.draw.rect(screen, (0, 128, 0), popup, 3)
+    font = pygame.font.SysFont(None, 32)
+    text = f"{player.capitalize()} wins!"
+    msg = font.render(text, True, (0, 100, 0))
+    screen.blit(msg, msg.get_rect(center=popup.center))

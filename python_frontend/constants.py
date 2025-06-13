@@ -64,3 +64,6 @@ ai_move_button_rect = pygame.Rect(WINDOW_WIDTH // 2 - 75, 70, 150, 40)
 # “No moves” popup
 no_moves_popup_rect  = pygame.Rect(WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 60, 400, 120)
 no_moves_button_rect = pygame.Rect(no_moves_popup_rect.centerx - 60, no_moves_popup_rect.y + 60, 120, 30)
+
+# Winner state
+winner_player = None  # "white" or "black"
