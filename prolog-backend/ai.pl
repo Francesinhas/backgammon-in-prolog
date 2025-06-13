@@ -1,5 +1,4 @@
 % Basic AI implementation
-% Simple rule-based strategy inspired by: 
 
 :- discontiguous use_die/1.
 :- discontiguous land_on/2.

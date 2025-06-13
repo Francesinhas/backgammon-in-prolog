@@ -60,10 +60,13 @@ move_from_bar(Player, To) :-
 
 % BEAR OFF PIECE
 bear_off_piece(Player, Point) :-
-    bear_off(Player, Point),
     retract(point(Point, Player, Count)),
     NewCount is Count - 1,
-    asserta(point(Point, Player, NewCount)),
+    (NewCount > 0 ->
+        asserta(point(Point, Player, NewCount)) % Re-assert the point only if checkers remain.
+    ;
+        true % Do not assert the point if it is now empty.
+    ),
     update_off(Player, 1).
 
 % UPDATE BAR COUNTER
