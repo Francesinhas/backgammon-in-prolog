@@ -42,12 +42,14 @@ perform_move_from_bar(Player, To) :-
     use_die(L).
 
 perform_bear_off(Player, Point) :-
-    bear_off_with_dice(Player, Point),        % todo - replace check with bear_off_with_dice and then with bear_off_with_dice_real
+    % 1. Validate the move using the new logic and get the die that will be used.
+    validate_and_get_bear_off_die(Player, Point, UsedDie),
+    
+    % 2. Apply the state change (remove checker from board and add to 'off').
     bear_off_piece(Player, Point),
-    bear_off_length(Player, Point, L),
-    use_die(L).
-
-
+    
+    % 3. Consume the correct die from the current roll.
+    use_die(UsedDie).
 
 perform_move_from_bar_dirty(Player, To) :-  % not used!
     bar(Player, BarCount), BarCount > 0,

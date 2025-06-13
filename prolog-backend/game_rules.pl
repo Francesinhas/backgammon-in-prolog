@@ -13,6 +13,9 @@
 % ]).
 
 :- discontiguous initial_state/0.
+:- discontiguous can_bear_off_state/0.
+:- discontiguous black_can_bar_state/0.
+:- discontiguous validate_and_get_bear_off_die/3.
 :- discontiguous valid_move/3.
 :- discontiguous valid_move_with_dice/3.
 :- discontiguous can_bear_off/1.
@@ -143,6 +146,25 @@ bear_off(Player, Point) :-
     point(Point, Player, Count),
     Count > 0,
     (Player = white -> between(1, 6, Point) ; between(19, 24, Point)).
+
+validate_and_get_bear_off_die(Player, Point, UsedDie) :-
+    bear_off(Player, Point), % Checks if the player is in a bear-off state and a checker exists on the point.
+    current_dice(DiceList),
+    (Player = white -> Dist is Point ; Dist is 25 - Point),
+    (
+        % Case 1: An exact die is available.
+        member(Dist, DiceList) ->
+        UsedDie = Dist
+    ;
+        % Case 2: Overshoot is allowed if no checkers are on higher points.
+        % Check that there are no checkers on points further from the goal.
+        \+ (point(HigherPoint, Player, C), C > 0, (Player = white -> HigherPoint > Point ; HigherPoint < Point)),
+        % Find all available dice that are greater than the required distance.
+        findall(D, (member(D, DiceList), D > Dist), BiggerDice),
+        BiggerDice \= [],
+        % To follow standard rules, use the smallest possible die for the move.
+        sort(BiggerDice, [UsedDie|_]) % Sorts ascending and unifies UsedDie with the head.
+    ).
 
 bear_off_with_dice(Player, Point) :-
     % 1. Check if the player is in a state to bear off from this point
