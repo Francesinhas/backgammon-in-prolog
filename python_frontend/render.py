@@ -18,11 +18,11 @@ DICE_SIZE = 50
 DICE_GAP = 10
 DICE_FONT_SIZE = 28
 
-# Special point indices
-BAR_WHITE_IDX = 24
-BAR_BLACK_IDX = 25
-OFF_WHITE_IDX = 26
-OFF_BLACK_IDX = 27
+# Special point indices (shifted to follow 1-based point indices)
+BAR_WHITE_IDX = 25
+BAR_BLACK_IDX = 26
+OFF_WHITE_IDX = 27
+OFF_BLACK_IDX = 28
 
 # Derived layout
 TOTAL_PLAY_WIDTH = 2 * NUM_TRIANGLES_PER_SIDE * POINT_WIDTH + BAR_WIDTH
@@ -39,6 +39,7 @@ popup_rect = pygame.Rect(WINDOW_WIDTH // 2 - 200, WINDOW_HEIGHT // 2 - 50, 400, 
 confirm_button_rect = pygame.Rect(popup_rect.centerx - 60, popup_rect.y + 50, 120, 30)
 
 def get_point_x(index):
+    index -= 1  # shift 1-based index to 0-based for layout
     if index < 6:
         return RIGHT_ZONE_START + (5 - index) * POINT_WIDTH
     elif index < 12:
@@ -50,7 +51,7 @@ def get_point_x(index):
 
 def get_triangle_rect(index):
     x = get_point_x(index)
-    y = 0 if index >= 12 else WINDOW_HEIGHT - POINT_HEIGHT
+    y = 0 if index > 12 else WINDOW_HEIGHT - POINT_HEIGHT
     return pygame.Rect(x, y, POINT_WIDTH, POINT_HEIGHT)
 
 def get_bar_rect(is_white):
@@ -66,11 +67,11 @@ def get_off_rect(is_white):
 
 def draw_board(screen):
     screen.fill(BOARD_COLOR)
-    for i in range(24):
+    for i in range(1, 25):
         x = get_point_x(i)
-        y = 0 if i >= 12 else WINDOW_HEIGHT
-        direction = 1 if i >= 12 else -1
-        color = (139, 69, 19) if i % 2 == 0 else (160, 82, 45)
+        y = 0 if i > 12 else WINDOW_HEIGHT
+        direction = 1 if i > 12 else -1
+        color = (139, 69, 19) if i % 2 == 1 else (160, 82, 45)
         pygame.draw.polygon(screen, color, [
             (x, y),
             (x + POINT_WIDTH, y),
@@ -79,9 +80,9 @@ def draw_board(screen):
     pygame.draw.rect(screen, (105, 105, 105), (BAR_START_X, 0, BAR_WIDTH, WINDOW_HEIGHT))
 
 def draw_checkers(screen, white_checkers, black_checkers):
-    for i in range(24):
+    for i in range(1, 25):
         x = get_point_x(i) + POINT_WIDTH // 2
-        if i < 12:
+        if i <= 12:
             wy = WINDOW_HEIGHT - CHECKER_RADIUS
             by = wy - CHECKER_RADIUS * 2 * white_checkers[i]
             for j in range(white_checkers[i]):
@@ -132,7 +133,7 @@ def draw_triangle_buttons(screen, selected_from, selected_to):
         s.fill(color)
         screen.blit(s, (rect.x, rect.y))
 
-    for i in range(24):
+    for i in range(1, 25):
         rect = get_triangle_rect(i)
         color = (255, 255, 0, 80) if selected_from == i else (0, 0, 255, 80) if selected_to == i else (0, 0, 0, 0)
         draw_rect(rect, color)
@@ -156,7 +157,7 @@ def move_label(idx):
         return "off (white)"
     if idx == OFF_BLACK_IDX:
         return "off (black)"
-    return str(idx + 1)
+    return str(idx)
 
 def draw_popup(screen, from_idx, to_idx):
     pygame.draw.rect(screen, (240, 240, 240), popup_rect)
@@ -197,7 +198,7 @@ def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_bl
                         show_popup = False
                 else:
                     found = False
-                    for i in range(24):
+                    for i in range(1, 25):
                         if get_triangle_rect(i).collidepoint(pos):
                             if selected_from is None:
                                 selected_from = i
@@ -239,14 +240,14 @@ def main(white_checkers, black_checkers, bar_white, bar_black, off_white, off_bl
     pygame.quit()
 
 if __name__ == "__main__":
-    white = [0] * 24
-    black = [0] * 24
-    white[0] = 2
-    white[11] = 5
-    white[16] = 3
-    black[23] = 2
-    black[12] = 5
-    black[7] = 3
+    white = [0] * 29
+    black = [0] * 29
+    white[1] = 2
+    white[12] = 5
+    white[17] = 3
+    black[24] = 2
+    black[13] = 5
+    black[8] = 3
 
     bar_white = 2
     bar_black = 3

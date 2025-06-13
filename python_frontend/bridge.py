@@ -2,14 +2,14 @@ from pyswip import Prolog, Variable
 import re
 
 prolog = Prolog()
-prolog.consult("main.pl")
+prolog.consult("../prolog-backend/main.pl")
 
 def get_current_board_state():
     state_query = list(prolog.query("state_to_list(StateList).", maxresult=1))
     board_state = state_query[0]["StateList"] if state_query else None
 
-    white_points = [0] * 24
-    black_points = [0] * 24
+    white_points = [0] * 25
+    black_points = [0] * 25
     bar_white = bar_black = off_white = off_black = 0
 
     for i, term in enumerate(board_state):
@@ -21,9 +21,9 @@ def get_current_board_state():
                 color = match.group(2)
                 count = int(match.group(3))
                 if color == "white":
-                    white_points[pos-1] = count
+                    white_points[pos] = count
                 else:
-                    black_points[pos-1] = count
+                    black_points[pos] = count
                 continue
 
             # Match structure bar/off terms like -(white, 0)
@@ -61,19 +61,65 @@ def reset_board():
     # Initialize game state
     initial_query = bool(list(prolog.query("initial_state.")))
 
-    return get_current_board_state()
+    return get_current_board_state() if initial_query else []
 
 def get_dice():
     dice_query = list(prolog.query("dice_roll(Dice).", maxresult=1))
     dice = dice_query[0]["Dice"] if dice_query else None
-    dice = dice + [dice[0], dice[0]] if dice[0] == dice[1] else dice
 
     return dice
 
+def perform_regular_move(player, fr, to):
+    try:
+        q = prolog.query(f"perform_move({player},{fr},{to}).")
+        result = next(q, None)
+        q.close()
 
-dice = get_dice()
+        if result is not None:
+            return get_current_board_state()
+        else:
+            return []
+    except Exception as e:
+        return []
+
+def perform_bar_move(player, to):
+    try:
+        q = prolog.query(f"perform_move_from_bar({player},{to}).")
+        result = next(q, None)
+        q.close()
+
+        if result is not None:
+            return get_current_board_state()
+        else:
+            return []
+    except Exception as e:
+        return []
+
+def perform_off_move(player, point):
+    try:
+        q = prolog.query(f"perform_bear_off({player},{point}).")
+        result = next(q, None)
+        q.close()
+
+        if result is not None:
+            return get_current_board_state()
+        else:
+            return []
+    except Exception as e:
+        return []
+
+def perform_move(player, fr, to):
+    if to == 27 or to == 28:
+        return perform_off_move(player, fr)
+    if fr == 25 or fr == 26:
+        return perform_bar_move(player, to)
+    return perform_regular_move(player, fr, to)
+
 reset_board()
-parsed_state = get_current_board_state()
+dice = get_dice()
+print(dice)
+#parsed_state = get_current_board_state()
+parsed_state = perform_move("white", 24, 24 - dice[0])
 
 # Display result
 for i in parsed_state:
