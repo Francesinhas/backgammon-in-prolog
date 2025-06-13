@@ -72,3 +72,8 @@ TODO
         → choose_move → apply → update board
     → check_winner
 → show_winner()
+
+### Tests
+- [X] check if capturing a piece actually puts it on the bar
+	- [X] check if the bar state is sent to state_to_list
+- [X] check perfom move from bar
