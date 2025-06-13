@@ -41,6 +41,15 @@ apply_move(Player, From, To) :-
     land_on(Player, To).
 
 % MOVE FROM BAR
+move_from_bar_with_dice(Player, To) :-
+    bar(Player, BarCount), BarCount > 0,
+    entry_point_length(Player, To, L),
+    current_dice(Dice), member(L, Dice),
+    retract(bar(Player, BarCount)),
+    NewBarCount is BarCount - 1,
+    asserta(bar(Player, NewBarCount)),
+    land_on(Player, To).
+
 move_from_bar(Player, To) :-
     bar(Player, BarCount), BarCount > 0,
     retract(bar(Player, BarCount)),
@@ -76,3 +85,9 @@ state_to_list(StateList) :-
     findall(Color-BarCount, bar(Color, BarCount), Bar),
     findall(Color-OffCount, off(Color, OffCount), Off),
     append([Points, Bar, Off], StateList).
+
+
+% helper predicates:
+
+entry_point_length(white, To, L) :- L is To.
+entry_point_length(black, To, L) :- L is 25 - To.

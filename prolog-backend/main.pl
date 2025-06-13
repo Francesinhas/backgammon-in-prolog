@@ -12,6 +12,11 @@
 :- include('state_manager').
 :- include('ai').
 
+
+available_moves(Player, Moves) :-   % todo also include moving from bar and bearing off
+    findall(move(From, To), choose_move_with_dice(Player, move(From, To)), RawMoves),
+    list_to_set(RawMoves, Moves).  % avoid duplicates
+
 ai_turn(Player) :-
     choose_move_with_dice(Player, move(From, To)),
     perform_move(Player, From, To).
@@ -31,8 +36,7 @@ perform_move(Player, From, To) :-
 perform_move_from_bar(Player, To) :-
     bar(Player, BarCount), BarCount > 0,
     entry_point_length(Player, To, L),
-    current_dice(Dice), member(L, Dice),
-    move_from_bar(Player, To),
+    move_from_bar_with_dice(Player, To),
     use_die(L).
 
 perform_bear_off(Player, Point) :-
@@ -42,13 +46,19 @@ perform_bear_off(Player, Point) :-
     use_die(L).
 
 
+
+perform_move_from_bar_dirty(Player, To) :-  % not used!
+    bar(Player, BarCount), BarCount > 0,
+    entry_point_length(Player, To, L),
+    current_dice(Dice), member(L, Dice),
+    move_from_bar(Player, To),
+    use_die(L).
+
+
 % helper predicates:
 
 move_length(Player, From, To, L) :-
     (Player = white -> L is From - To ; L is To - From).
-
-entry_point_length(white, To, L) :- L is To.
-entry_point_length(black, To, L) :- L is 25 - To.
 
 bear_off_length(white, Point, L) :- L is Point.
 bear_off_length(black, Point, L) :- L is 25 - Point.
