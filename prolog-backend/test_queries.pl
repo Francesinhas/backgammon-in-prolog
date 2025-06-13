@@ -1,8 +1,9 @@
 :- include('game_rules').
 
 :- discontiguous move_from_bar/2.
-:- discontiguous perfom_move/3.
+:- discontiguous perform_move/3.
 :- discontiguous choose_move/3.
+:- discontiguous perform_move_from_bar/2.
 
 
 
@@ -38,7 +39,7 @@ test_capture_and_move_from_bar:-
     % Place a piece alone on position 11
     asserta(point(11, black, 1)), valid_move(white,13,11),
     % Capture is performed from pos 13 to pos 11
-    perfom_move(white,13,11),
+    perform_move(white,13,11),
     % Should be 1 on the black bar
     bar(black,1),
     % Should fail because no piece on position 11
@@ -46,7 +47,11 @@ test_capture_and_move_from_bar:-
     move_from_bar(black,22),
     bar(black,0).
 
-
+test-perform-form-bar:-
+    initial_state,
+    asserta(bar(white,1)),
+    asserta(current_dice([2])),
+    perform_move_from_bar(white,23).
 
 test :-
     initial_state,
