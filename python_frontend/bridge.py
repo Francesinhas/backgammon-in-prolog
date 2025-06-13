@@ -2,7 +2,7 @@ from pyswip import Prolog, Variable
 import re
 
 prolog = Prolog()
-prolog.consult("main.pl")
+prolog.consult("../prolog-backend/main.pl")
 
 def get_current_board_state():
     state_query = list(prolog.query("state_to_list(StateList).", maxresult=1))
@@ -61,19 +61,58 @@ def reset_board():
     # Initialize game state
     initial_query = bool(list(prolog.query("initial_state.")))
 
-    return get_current_board_state()
+    return get_current_board_state() if initial_query else []
 
 def get_dice():
     dice_query = list(prolog.query("dice_roll(Dice).", maxresult=1))
     dice = dice_query[0]["Dice"] if dice_query else None
-    dice = dice + [dice[0], dice[0]] if dice[0] == dice[1] else dice
 
     return dice
 
+def perform_regular_move(player, fr, to):
+    try:
+        q = prolog.query(f"perform_move({player},{fr},{to}).")
+        result = next(q, None)
+        q.close()
 
-dice = get_dice()
+        if result is not None:
+            return get_current_board_state()
+        else:
+            return []
+    except Exception as e:
+        return []
+
+def perform_bar_move(player, to):
+    try:
+        q = prolog.query(f"perform_move_from_bar({player},{to}).")
+        result = next(q, None)
+        q.close()
+
+        if result is not None:
+            return get_current_board_state()
+        else:
+            return []
+    except Exception as e:
+        return []
+
+def perform_off_move(player, point):
+    try:
+        q = prolog.query(f"perform_bear_off({player},{point}).")
+        result = next(q, None)
+        q.close()
+
+        if result is not None:
+            return get_current_board_state()
+        else:
+            return []
+    except Exception as e:
+        return []
+
 reset_board()
-parsed_state = get_current_board_state()
+dice = get_dice()
+print(dice)
+#parsed_state = get_current_board_state()
+parsed_state = perform_regular_move("white", 24, 24 - dice[0])
 
 # Display result
 for i in parsed_state:
