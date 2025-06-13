@@ -63,8 +63,14 @@ def reset_board():
 
     return get_current_board_state() if initial_query else []
 
-def get_dice():
+def roll_dice():
     dice_query = list(prolog.query("dice_roll(Dice).", maxresult=1))
+    dice = dice_query[0]["Dice"] if dice_query else None
+
+    return dice
+
+def get_dice():
+    dice_query = list(prolog.query("current_dice(Dice).", maxresult=1))
     dice = dice_query[0]["Dice"] if dice_query else None
 
     return dice
@@ -116,6 +122,7 @@ def perform_move(player, fr, to):
     return perform_regular_move(player, fr, to)
 
 reset_board()
+roll_dice()
 dice = get_dice()
 print(dice)
 #parsed_state = get_current_board_state()
@@ -124,3 +131,6 @@ parsed_state = perform_move("white", 24, 24 - dice[0])
 # Display result
 for i in parsed_state:
     print(f"{i}")
+
+dice = get_dice()
+print(dice)
