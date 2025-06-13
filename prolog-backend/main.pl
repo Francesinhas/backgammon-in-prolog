@@ -8,8 +8,19 @@
 
 % necessary supressions for swi runtime
 
-:- include('game_rules').
+% :- include('game_rules'). % already included in both state_manager and ai
 :- include('state_manager').
+:- include('ai').
+
+ai_turn(Player) :-
+    choose_move_with_dice(Player, move(From, To)),
+    perform_move(Player, From, To).
+
+% Fallback when no move is available, open for extension
+ai_turn(Player) :-
+    choose_move_with_dice(Player, none),
+    % format("No available moves for ~w~n", [Player]).
+    false.
 
 perform_move(Player, From, To) :-
     valid_move_with_dice(Player, From, To),
