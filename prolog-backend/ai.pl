@@ -17,7 +17,7 @@
 :- include('state_manager').
 
 % SIMPLE AI STRATEGY
-choose_move_with_dice_good(Player, Move) :-
+choose_move_with_dice(Player, Move) :-
     generate_ai_moves(Player, ScoredMoves),
     select_best_move(ScoredMoves, Move).
 
@@ -96,7 +96,7 @@ can_land_on(Player, To) :-
 
 
 
-choose_move_with_dice(Player, Move) :-  % not taking bearing off and bar into account - not used!
+choose_move_with_dice_old(Player, Move) :-  % not taking bearing off and bar into account - not used!
     findall(From-To, valid_move_with_dice(Player, From, To), Moves),
     (Moves = [] 
         -> Move = none  % No moves available

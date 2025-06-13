@@ -20,6 +20,10 @@ get_best_move(Player, BestMove) :-
     ).
 
 ai_turn(Player) :-
+    choose_move_with_dice(Player, move(bar, To)),
+    perform_move_from_bar(Player, To).
+
+ai_turn(Player) :-
     choose_move_with_dice(Player, move(From, To)),
     perform_move(Player, From, To).
 
