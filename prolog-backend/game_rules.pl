@@ -54,6 +54,8 @@ valid_move(Player, From, To) :-
 
     point(From, Player, Count), Count > 0,  % Own piece exists
 
+    % nonvar(From), nonvar(To),  % <-- Ensure they're both instantiated
+
     (Player = white -> To < From ; To > From),  % Direction check
 
     between(1, 24, To),  % Valid board position
