@@ -1,7 +1,9 @@
 # app.py
 import pygame
 import sys
-from prolog_bridge import get_current_board_state, roll_dice, get_dice, perform_move, reset_board
+from prolog_bridge import (
+    get_current_board_state, roll_dice, get_dice, perform_move, reset_board, ai_move
+)
 from constants import *
 from render import (
     get_triangle_rect, get_bar_rect, get_off_rect,
@@ -10,8 +12,11 @@ from render import (
     draw_invalid_move_popup
 )
 
+is_user_turn = True  # Tracks whose turn it is
+
 def main():
-    global selected_from, selected_to, show_popup, show_invalid_move_popup, invalid_popup_timer, has_rolled_dice
+    global selected_from, selected_to, show_popup, show_invalid_move_popup, invalid_popup_timer
+    global has_rolled_dice, is_user_turn
 
     reset_board()
 
@@ -19,7 +24,7 @@ def main():
     if not state:
         print("Failed to load board state.")
         return
-    dice_values = []  # Don't show dice before rolling
+    dice_values = []
 
     white_checkers, black_checkers, bar_white, bar_black, off_white, off_black = state
 
@@ -45,6 +50,14 @@ def main():
                     roll_dice()
                     dice_values = get_dice()
                     has_rolled_dice = True
+                elif not is_user_turn and ai_move_button_rect.collidepoint(pos) and has_rolled_dice:
+                    updated = ai_move("black")
+                    if updated:
+                        white_checkers, black_checkers, bar_white, bar_black, off_white, off_black = updated
+                        dice_values = get_dice()
+                    if not dice_values:
+                        is_user_turn = True
+                        has_rolled_dice = False
                 elif show_popup and selected_from is not None and selected_to is not None:
                     if confirm_button_rect.collidepoint(pos):
                         fr = 25 if selected_from == BAR_WHITE_IDX else selected_from
@@ -59,6 +72,9 @@ def main():
                         selected_from = None
                         selected_to = None
                         show_popup = False
+                        if not dice_values:
+                            is_user_turn = False
+                            has_rolled_dice = False
                 else:
                     for i in range(1, 25):
                         if get_triangle_rect(i).collidepoint(pos):
@@ -79,15 +95,24 @@ def main():
         draw_board(screen)
         draw_checkers(screen, white_checkers, black_checkers)
         draw_bar_and_off(screen, bar_white, bar_black, off_white, off_black)
+
         if has_rolled_dice:
             draw_dice(screen, dice_values)
         draw_triangle_buttons(screen, selected_from, selected_to)
 
+        # Roll button
         pygame.draw.rect(screen, (173, 216, 230) if not has_rolled_dice else (200, 200, 200), roll_button_rect)
         pygame.draw.rect(screen, (0, 0, 0), roll_button_rect, 2)
         font = pygame.font.SysFont(None, 24)
         roll_text = font.render("Roll Dice", True, (0, 0, 0))
         screen.blit(roll_text, roll_text.get_rect(center=roll_button_rect.center))
+
+        # AI move button
+        if not is_user_turn and has_rolled_dice:
+            pygame.draw.rect(screen, (240, 230, 140), ai_move_button_rect)
+            pygame.draw.rect(screen, (0, 0, 0), ai_move_button_rect, 2)
+            ai_text = font.render("Make AI Move", True, (0, 0, 0))
+            screen.blit(ai_text, ai_text.get_rect(center=ai_move_button_rect.center))
 
         if show_popup:
             draw_popup(screen, selected_from, selected_to)

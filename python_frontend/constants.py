@@ -38,3 +38,5 @@ roll_button_rect = pygame.Rect(WINDOW_WIDTH // 2 - 75, 20, 150, 40)
 show_invalid_move_popup = False
 invalid_popup_timer = 0
 has_rolled_dice = False
+
+ai_move_button_rect = pygame.Rect(WINDOW_WIDTH // 2 - 75, 70, 150, 40)

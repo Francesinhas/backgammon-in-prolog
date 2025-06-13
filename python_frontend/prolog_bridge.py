@@ -121,6 +121,19 @@ def perform_move(player, fr, to):
         return perform_bar_move(player, to)
     return perform_regular_move(player, fr, to)
 
+def ai_move(player):
+    try:
+        q = prolog.query(f"ai_turn({player}).")
+        result = next(q, None)
+        q.close()
+
+        if result is not None:
+            return get_current_board_state()
+        else:
+            return []
+    except Exception as e:
+        return []    
+
 # Testing
 # reset_board()
 # roll_dice()
