@@ -72,7 +72,7 @@ def get_current_board_state():
     ]
 def reset_board():
     # Initialize game state
-    initial_query = bool(list(prolog.query("can_bear_off_state .")))
+    initial_query = bool(list(prolog.query("initial_state .")))
 
     return get_current_board_state() if initial_query else []
 
