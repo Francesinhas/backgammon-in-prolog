@@ -17,29 +17,6 @@
 
 :- include('state_manager').
 
-opponent(white, black).
-opponent(black, white).
-
-is_blot_hittable(Point, Player) :-
-    opponent(Player, Opponent),
-    findall(D, (
-        between(1, 6, D),
-        (   Opponent = white -> CheckPoint is Point + D
-        ;   Opponent = black -> CheckPoint is Point - D
-        ),
-        between(1, 24, CheckPoint), % Ensure the point is on the board
-        point(CheckPoint, Opponent, C), C > 0
-    ), Hits),
-    Hits \= []. % Succeeds if the list of possible hits is not empty.
-
-prime_contribution_bonus(Point, Player, 2) :-
-    Adj1 is Point - 1,
-    Adj2 is Point + 1,
-    (   (between(1, 24, Adj1), point(Adj1, Player, C1), C1 > 0)
-    ;   (between(1, 24, Adj2), point(Adj2, Player, C2), C2 > 0)
-    ), !.
-prime_contribution_bonus(_, _, 0).
-
 % SIMPLE AI STRATEGY
 choose_move_with_dice(Player, Move) :-
     generate_ai_moves(Player, ScoredMoves),
@@ -155,6 +132,30 @@ choose_move_with_dice_old(Player, Move) :-  % not taking bearing off and bar int
         max_member(Score-BestMove, Scores),
         Move = BestMove
     ).
+
+% helper 
+opponent(white, black).
+opponent(black, white).
+
+is_blot_hittable(Point, Player) :-
+    opponent(Player, Opponent),
+    findall(D, (
+        between(1, 6, D),
+        (   Opponent = white -> CheckPoint is Point + D
+        ;   Opponent = black -> CheckPoint is Point - D
+        ),
+        between(1, 24, CheckPoint), % Ensure the point is on the board
+        point(CheckPoint, Opponent, C), C > 0
+    ), Hits),
+    Hits \= []. % Succeeds if the list of possible hits is not empty.
+
+prime_contribution_bonus(Point, Player, 2) :-
+    Adj1 is Point - 1,
+    Adj2 is Point + 1,
+    (   (between(1, 24, Adj1), point(Adj1, Player, C1), C1 > 0)
+    ;   (between(1, 24, Adj2), point(Adj2, Player, C2), C2 > 0)
+    ), !.
+prime_contribution_bonus(_, _, 0).
 
 
 % MINIMAX SKELETON (for future implementation)
