@@ -26,12 +26,9 @@ generate_ai_moves(Player, AllMoves) :-
     bar(Player, Count),
     (   Count > 0
     ->  generate_bar_entry_moves(Player, BarMoves),
-        format("Bar moves for ~w: ~w~n", [Player, BarMoves]),
         AllMoves = BarMoves
     ;   generate_normal_moves(Player, NormalMoves),
-        format("Normal moves for ~w: ~w~n", [Player, NormalMoves]),
         generate_bear_off_moves(Player, BearOffMoves),
-        format("Bear off moves for ~w: ~w~n", [Player, BearOffMoves]),
         append(NormalMoves, BearOffMoves, AllMoves)
     ).
 
