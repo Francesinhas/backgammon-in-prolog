@@ -1,4 +1,4 @@
-% Basic AI implementation
+% AI implementation
 
 :- discontiguous use_die/1.
 :- discontiguous land_on/2.

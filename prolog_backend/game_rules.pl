@@ -97,12 +97,10 @@ validate_and_get_bear_off_die(Player, Point, UsedDie) :-
 bear_off_with_dice(Player, Point) :-
     % 1. Check if the player is in a state to bear off from this point
     bear_off(Player, Point),
-
     % 2. Check if the required die is available in the current roll
     current_dice(DiceList),
     (Player = white -> Dist is Point ; Dist is 25 - Point),
     member(Dist, DiceList),
-
     % 3. Execute the move: remove the checker from the point and update the 'off' count
     retract(point(Point, Player, Count)),
     NewCount is Count - 1,

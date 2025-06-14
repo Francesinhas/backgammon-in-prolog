@@ -1,3 +1,5 @@
+% Initial game state and other game states for testing
+
 :- dynamic point/3, bar/2, off/2, current_dice/1.
 
 % INITIAL BOARD SETUP
