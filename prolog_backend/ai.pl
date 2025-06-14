@@ -23,9 +23,12 @@ generate_ai_moves(Player, AllMoves) :-
     bar(Player, Count),
     (   Count > 0
     ->  generate_bar_entry_moves(Player, BarMoves),
+        format("Bar moves for ~w: ~w~n", [Player, BarMoves]),
         AllMoves = BarMoves
     ;   generate_normal_moves(Player, NormalMoves),
+        format("Normal moves for ~w: ~w~n", [Player, NormalMoves]),
         generate_bear_off_moves(Player, BearOffMoves),
+        format("Bear off moves for ~w: ~w~n", [Player, BearOffMoves]),
         append(NormalMoves, BearOffMoves, AllMoves)
     ).
 
@@ -39,10 +42,11 @@ generate_normal_moves(Player, ScoredMoves) :-
     maplist(wrap_and_evaluate(Player), Moves, ScoredMoves).
 
 generate_bear_off_moves(Player, ScoredMoves) :-
-    can_bear_off(Player),
-    findall(Point, (point(Point, Player, C), C > 0, validate_and_get_bear_off_die(Player, Point, _)), Points),
-    maplist(wrap_bear_off_move(Player), Points, ScoredMoves).
-
+    (   can_bear_off(Player)
+    ->  findall(Point, (point(Point, Player, C), C > 0, validate_and_get_bear_off_die(Player, Point, _)), Points),
+        maplist(wrap_bear_off_move(Player), Points, ScoredMoves)
+    ;   ScoredMoves = []
+    ).
 
 select_best_move([], none).
 select_best_move(ScoredMoves, Move) :-
