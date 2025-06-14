@@ -11,6 +11,9 @@
 :- discontiguous entry_point_length/1.
 :- discontiguous move_length/1.
 :- discontiguous bear_off_length/1.
+:- discontiguous can_leave_bar_state/0.
+:- discontiguous can_leave_bar_state2/0.
+:- discontiguous entry_range/3.
 
 :- include('state_manager').
 
