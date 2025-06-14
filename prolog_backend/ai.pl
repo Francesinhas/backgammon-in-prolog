@@ -19,12 +19,16 @@ choose_move_with_dice(Player, Move) :-
     generate_ai_moves(Player, ScoredMoves),
     select_best_move(ScoredMoves, Move).
 
-generate_ai_moves(Player, ScoredMoves) :-
+generate_ai_moves(Player, AllMoves) :-
     bar(Player, Count),
     (   Count > 0
-    ->  generate_bar_entry_moves(Player, ScoredMoves)
-    ;   generate_normal_moves(Player, ScoredMoves)
+    ->  generate_bar_entry_moves(Player, BarMoves),
+        AllMoves = BarMoves
+    ;   generate_normal_moves(Player, NormalMoves),
+        generate_bear_off_moves(Player, BearOffMoves),
+        append(NormalMoves, BearOffMoves, AllMoves)
     ).
+
 
 generate_bar_entry_moves(Player, ScoredMoves) :-
     findall(To, can_move_from_bar_with_dice(Player, To), EntryPoints),
@@ -33,6 +37,12 @@ generate_bar_entry_moves(Player, ScoredMoves) :-
 generate_normal_moves(Player, ScoredMoves) :-
     findall(From-To, valid_move_with_dice(Player, From, To), Moves),
     maplist(wrap_and_evaluate(Player), Moves, ScoredMoves).
+
+generate_bear_off_moves(Player, ScoredMoves) :-
+    can_bear_off(Player),
+    findall(Point, (point(Point, Player, C), C > 0, validate_and_get_bear_off_die(Player, Point, _)), Points),
+    maplist(wrap_bear_off_move(Player), Points, ScoredMoves).
+
 
 select_best_move([], none).
 select_best_move(ScoredMoves, Move) :-
@@ -68,6 +78,12 @@ evaluate_bar_entry(Player, To, Score) :-
     ;   Score = 0
     ).
 
+
+wrap_bear_off_move(Player, Point, Score-move(Point, off)) :-
+    evaluate_bear_off(Player, Point, Score).
+
+evaluate_bear_off(_Player, _Point, 5).  % 5p. bearing off a piece
+% todo: use Point to assign score based on distance
 
 
 
