@@ -55,10 +55,6 @@ perform_bear_off(Player, Point) :-
     bear_off_piece(Player, Point),
     use_die(UsedDie).
 
-
-
-
-
 perform_move_from_bar_dirty(Player, To) :-  % not used!
     bar(Player, BarCount), BarCount > 0,
     entry_point_length(Player, To, L),
