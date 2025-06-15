@@ -56,44 +56,51 @@ select_best_move(ScoredMoves, Move) :-
 wrap_and_evaluate(Player, From-To, Score-move(From, To)) :-
     evaluate_move(Player, move(From, To), Score).
 
-evaluate_move(Player, move(From, To), Score) :-
+evaluate_move(Player, move(From, To), FinalScore) :-
     opponent(Player, Opponent),
 
-    % Case 1: Hitting an opponent's blot. This is a top priority.
-    (   point(To, Opponent, 1) ->
-        (   point(To, Player, _) ->
-            Score is 20 + 5  % Hit and cover: Very safe, high reward.
-        ;   \+ is_blot_hittable(To, Player) ->
-            Score is 20 + 3  % Hit and run: Land on a new, safe blot.
-        ;   Score is 20      % Hit but leave a hittable blot. Still good.
-        )
+    % Calculate a base score for the move type
+    (
+        % Case 1: Hitting an opponent's blot. This is a top priority.
+        point(To, Opponent, 1) ->
+            (   point(To, Player, _) ->
+                Score = 25  % Hit and cover: Very safe, high reward.
+            ;   \+ is_blot_hittable(To, Player) ->
+                Score = 23  % Hit and run: Land on a new, safe blot.
+            ;   Score = 20  % Hit but leave a hittable blot. Still good.
+            )
 
-    % Case 2: Making a new point (securing a blot).
-    ;   point(To, Player, 1) ->
-        prime_contribution_bonus(To, Player, PrimeBonus),
-        Score is 15 + PrimeBonus % Base score for making a point, plus prime bonus.
+        % Case 2: Making a new point (securing a blot).
+        ;   point(To, Player, 1) ->
+            prime_contribution_bonus(To, Player, PrimeBonus),
+            Score is 15 + PrimeBonus % Base score for making a point, plus prime bonus.
 
-    % Case 3: Moving to an empty point (creating a new blot).
-    ;   \+ point(To, _, _) ->
-        (   is_blot_hittable(To, Player) ->
-            Score is 1 % Heavily penalize creating an unsafe blot.
-        ;   Score is 5 % Creating a safe blot is a reasonable move.
-        )
+        % Case 3: Moving to an empty point (creating a new blot).
+        ;   \+ point(To, _, _) ->
+            (   is_in_home_board(Player, To) ->
+                Score = 0  % STRONGLY PENALIZE creating blots in the home board.
+            ;   is_blot_hittable(To, Player) ->
+                Score = 1  % Penalize creating an unsafe blot elsewhere.
+            ;   Score = 5  % Creating a safe blot outside the home board is okay.
+            )
 
-    % Case 4: Adding to an already established, safe point.
-    ;   point(To, Player, Count), Count > 1 ->
-        (   Count > 4 -> Score is 2 % Penalize inefficient stacking.
-        ;   Score is 4 % Standard move, safe but not creating new structure.
-        )
-    ;   Score = 0 % Default case
+        % Case 4: Adding to an already established, safe point.
+        ;   point(To, Player, Count), Count > 1 ->
+            (   Count > 4 -> Score = 2 % Penalize inefficient stacking.
+            ;   Score = 4 % Standard move, safe but not creating new structure.
+            )
+        ;   Score = 0 % Default case
     ),
 
-    % Apply penalty for breaking a made point, unless it's for a hit.
+    % Apply penalty for breaking a made point, unless it's for a high-value hit.
     (   point(From, Player, 2), \+ point(To, Opponent, 1) ->
-        FinalScore is Score - 3
-    ;   FinalScore is Score
-    ).
+        IntermediateScore is Score - 3
+    ;   IntermediateScore is Score
+    ),
 
+    % Add the runner bonus to prioritize moving back checkers.
+    runner_bonus(Player, From, RunnerBonus),
+    FinalScore is IntermediateScore + RunnerBonus.
 
 wrap_bar_move(Player, To, Score-move(bar, To)) :-
     evaluate_bar_entry(Player, To, Score).
@@ -156,6 +163,17 @@ prime_contribution_bonus(Point, Player, 2) :-
     ;   (between(1, 24, Adj2), point(Adj2, Player, C2), C2 > 0)
     ), !.
 prime_contribution_bonus(_, _, 0).
+
+% Succeeds if the Point is within the Player's home board.
+is_in_home_board(white, Point) :- Point >= 1, Point =< 6.
+is_in_home_board(black, Point) :- Point >= 19, Point =< 24.
+
+% Adds a scaled bonus for moving back checkers ("runners"). The further the better.
+runner_bonus(white, From, Bonus) :-
+    (From > 6 -> Bonus is floor((From - 6) / 2) ; Bonus = 0), !.
+runner_bonus(black, From, Bonus) :-
+    (From < 19 -> Bonus is floor((19 - From) / 2) ; Bonus = 0), !.
+runner_bonus(_, _, 0).
 
 
 % MINIMAX SKELETON (for future implementation)
