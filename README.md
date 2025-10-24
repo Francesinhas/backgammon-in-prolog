@@ -27,7 +27,7 @@ A classic implementation of the game Backgammon, written in Prolog. This project
 
 ### Python interface
 
-TODO
+- A simple python user interface has been created.
 
   
 
